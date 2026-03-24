@@ -1,0 +1,14 @@
+C:\Users\jesus\source\repos\Examen\Examen\bin\Debug\Examen.exe.config
+C:\Users\jesus\source\repos\Examen\Examen\bin\Debug\Examen.exe
+C:\Users\jesus\source\repos\Examen\Examen\bin\Debug\Examen.pdb
+C:\Users\jesus\source\repos\Examen\Examen\obj\Debug\Examen.csproj.AssemblyReference.cache
+C:\Users\jesus\source\repos\Examen\Examen\obj\Debug\Examen.Form1.resources
+C:\Users\jesus\source\repos\Examen\Examen\obj\Debug\Examen.Properties.Resources.resources
+C:\Users\jesus\source\repos\Examen\Examen\obj\Debug\Examen.csproj.GenerateResource.cache
+C:\Users\jesus\source\repos\Examen\Examen\obj\Debug\Examen.csproj.CoreCompileInputs.cache
+C:\Users\jesus\source\repos\Examen\Examen\obj\Debug\Examen.exe
+C:\Users\jesus\source\repos\Examen\Examen\obj\Debug\Examen.pdb
+C:\Users\jesus\source\repos\Examen\Examen\obj\Debug\Examen.Form2.resources
+C:\Users\jesus\source\repos\Examen\Examen\obj\Debug\Examen.Form3.resources
+C:\Users\jesus\source\repos\Examen\Examen\obj\Debug\Examen.Form4.resources
+C:\Users\jesus\source\repos\Examen\Examen\obj\Debug\Examen.Form5.resources
