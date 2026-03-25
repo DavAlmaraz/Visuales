@@ -29,45 +29,143 @@ namespace Examen
 
         private void InitializeAccountCreateControls()
         {
-            this.Text = "Crear cuenta";
-            this.Size = new Size(460, 300);
-            this.BackColor = Color.FromArgb(255, 230, 0);
+            this.Text = "Mercado Libre - Crear cuenta";
+            this.Size = new Size(540, 520);
+            this.BackColor = Color.FromArgb(255, 253, 231); // pastel ML yellow
             this.Font = new Font("Segoe UI", 10f);
-            Label lbl = new Label { Text = "Nombre titular:", Location = new Point(12, 12), AutoSize = true, ForeColor = Color.FromArgb(0,85,165) };
-            txtOwnerCreate = new TextBox { Location = new Point(12, 36), Width = 360 };
+            this.FormBorderStyle = FormBorderStyle.FixedSingle;
+            this.MaximizeBox = false;
+            this.StartPosition = FormStartPosition.CenterScreen;
+
+            // Card panel
+            Panel card = new Panel
+            {
+                Size = new Size(460, 420),
+                Location = new Point(32, 40),
+                BackColor = Color.White,
+                Padding = new Padding(24)
+            };
+            card.Paint += (s, ev) =>
+            {
+                var rect = new Rectangle(0, 0, card.Width - 1, card.Height - 1);
+                ev.Graphics.DrawRectangle(new Pen(Color.FromArgb(255, 236, 179), 2), rect);
+            };
+
+            // Gold stripe
+            Panel stripe = new Panel
+            {
+                Size = new Size(460, 6),
+                Location = new Point(0, 0),
+                BackColor = Color.FromArgb(255, 202, 40) // ML gold
+            };
+            card.Controls.Add(stripe);
+
+            // Title
+            Label lblTitle = new Label
+            {
+                Text = "Mercado Libre",
+                Font = new Font("Segoe UI", 16f, FontStyle.Bold),
+                ForeColor = Color.FromArgb(245, 166, 35),
+                AutoSize = true,
+                Location = new Point(24, 20)
+            };
+            Label lblSub = new Label
+            {
+                Text = "Crea tu cuenta",
+                Font = new Font("Segoe UI", 10f),
+                ForeColor = Color.FromArgb(120, 120, 120),
+                AutoSize = true,
+                Location = new Point(24, 50)
+            };
+
+            int y = 80;
+            int fieldW = 400;
+
+            // Name
+            Label lblName = new Label { Text = "Nombre completo", Font = new Font("Segoe UI", 9f, FontStyle.Bold), ForeColor = Color.FromArgb(90, 80, 60), AutoSize = true, Location = new Point(24, y) };
+            txtOwnerCreate = new TextBox { Location = new Point(24, y + 20), Size = new Size(fieldW, 26), Font = new Font("Segoe UI", 10f), BorderStyle = BorderStyle.FixedSingle, BackColor = Color.FromArgb(255, 253, 245) };
+            y += 52;
+
             // Phone
-            Label lblPhone = new Label { Text = "Teléfono:", Location = new Point(12, 56), AutoSize = true, ForeColor = Color.FromArgb(0,85,165) };
-            txtPhone = new TextBox { Location = new Point(12, 76), Width = 200 };
-            // Address
-            Label lblAddress = new Label { Text = "Dirección:", Location = new Point(12, 102), AutoSize = true, ForeColor = Color.FromArgb(0,85,165) };
-            txtAddress = new TextBox { Location = new Point(12, 122), Width = 420 };
-            // Email and Password on same row
-            Label lblEmail = new Label { Text = "Email:", Location = new Point(12, 152), AutoSize = true, ForeColor = Color.FromArgb(0,85,165) };
-            txtEmailCreate = new TextBox { Location = new Point(12, 172), Width = 260 };
-            Label lblPassword = new Label { Text = "Contraseña:", Location = new Point(300, 152), AutoSize = true, ForeColor = Color.FromArgb(0,85,165) };
-            txtPasswordCreate = new TextBox { Location = new Point(300, 172), Width = 180, UseSystemPasswordChar = true };
-            // buttons placed at bottom
-            btnCreate = new Button { Text = "Crear cuenta", Location = new Point(12, 220), Size = new Size(140, 34), BackColor = Color.FromArgb(0,85,165), ForeColor = Color.White, FlatStyle = FlatStyle.Flat };
-            btnGoLogin = new Button { Text = "Volver al inicio", Location = new Point(168, 220), Size = new Size(140, 34), BackColor = Color.White, ForeColor = Color.FromArgb(0,85,165), FlatStyle = FlatStyle.Flat };
-            btnBackCreate = new Button { Text = "Atrás", Location = new Point(324, 220), Size = new Size(120, 34), BackColor = Color.White, ForeColor = Color.FromArgb(0,85,165), FlatStyle = FlatStyle.Flat };
+            Label lblPhone = new Label { Text = "Teléfono", Font = new Font("Segoe UI", 9f, FontStyle.Bold), ForeColor = Color.FromArgb(90, 80, 60), AutoSize = true, Location = new Point(24, y) };
+            txtPhone = new TextBox { Location = new Point(24, y + 20), Size = new Size(180, 26), Font = new Font("Segoe UI", 10f), BorderStyle = BorderStyle.FixedSingle, BackColor = Color.FromArgb(255, 253, 245) };
+
+            // Address (same row)
+            Label lblAddress = new Label { Text = "Dirección", Font = new Font("Segoe UI", 9f, FontStyle.Bold), ForeColor = Color.FromArgb(90, 80, 60), AutoSize = true, Location = new Point(220, y) };
+            txtAddress = new TextBox { Location = new Point(220, y + 20), Size = new Size(204, 26), Font = new Font("Segoe UI", 10f), BorderStyle = BorderStyle.FixedSingle, BackColor = Color.FromArgb(255, 253, 245) };
+            y += 52;
+
+            // Email
+            Label lblEmail = new Label { Text = "Correo electrónico", Font = new Font("Segoe UI", 9f, FontStyle.Bold), ForeColor = Color.FromArgb(90, 80, 60), AutoSize = true, Location = new Point(24, y) };
+            txtEmailCreate = new TextBox { Location = new Point(24, y + 20), Size = new Size(fieldW, 26), Font = new Font("Segoe UI", 10f), BorderStyle = BorderStyle.FixedSingle, BackColor = Color.FromArgb(255, 253, 245) };
+            y += 52;
+
+            // Password
+            Label lblPassword = new Label { Text = "Contraseña", Font = new Font("Segoe UI", 9f, FontStyle.Bold), ForeColor = Color.FromArgb(90, 80, 60), AutoSize = true, Location = new Point(24, y) };
+            txtPasswordCreate = new TextBox { Location = new Point(24, y + 20), Size = new Size(fieldW, 26), Font = new Font("Segoe UI", 10f), UseSystemPasswordChar = true, BorderStyle = BorderStyle.FixedSingle, BackColor = Color.FromArgb(255, 253, 245) };
+            y += 56;
+
+            // Buttons
+            btnCreate = new Button
+            {
+                Text = "Crear cuenta",
+                Location = new Point(24, y),
+                Size = new Size(fieldW, 40),
+                BackColor = Color.FromArgb(255, 202, 40),
+                ForeColor = Color.FromArgb(50, 40, 10),
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Segoe UI", 11f, FontStyle.Bold),
+                Cursor = Cursors.Hand
+            };
+            btnCreate.FlatAppearance.BorderSize = 0;
+            y += 48;
+
+            btnGoLogin = new Button
+            {
+                Text = "Ya tengo cuenta",
+                Location = new Point(24, y),
+                Size = new Size(193, 34),
+                BackColor = Color.FromArgb(227, 242, 253),
+                ForeColor = Color.FromArgb(30, 136, 229),
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Segoe UI", 9f, FontStyle.Bold),
+                Cursor = Cursors.Hand
+            };
+            btnGoLogin.FlatAppearance.BorderColor = Color.FromArgb(187, 222, 251);
+
+            btnBackCreate = new Button
+            {
+                Text = "Cancelar",
+                Location = new Point(231, y),
+                Size = new Size(193, 34),
+                BackColor = Color.FromArgb(255, 238, 238),
+                ForeColor = Color.FromArgb(198, 40, 40),
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Segoe UI", 9f, FontStyle.Bold),
+                Cursor = Cursors.Hand
+            };
+            btnBackCreate.FlatAppearance.BorderColor = Color.FromArgb(239, 154, 154);
 
             btnCreate.Click += BtnCreate_Click;
             btnGoLogin.Click += BtnGoLogin_Click;
             btnBackCreate.Click += BtnBackCreate_Click;
 
-            this.Controls.Add(lbl);
-            this.Controls.Add(txtOwnerCreate);
-            this.Controls.Add(lblPhone);
-            this.Controls.Add(txtPhone);
-            this.Controls.Add(lblAddress);
-            this.Controls.Add(txtAddress);
-            this.Controls.Add(lblEmail);
-            this.Controls.Add(txtEmailCreate);
-            this.Controls.Add(lblPassword);
-            this.Controls.Add(txtPasswordCreate);
-            this.Controls.Add(btnCreate);
-            this.Controls.Add(btnGoLogin);
-            this.Controls.Add(btnBackCreate);
+            card.Controls.Add(lblTitle);
+            card.Controls.Add(lblSub);
+            card.Controls.Add(lblName);
+            card.Controls.Add(txtOwnerCreate);
+            card.Controls.Add(lblPhone);
+            card.Controls.Add(txtPhone);
+            card.Controls.Add(lblAddress);
+            card.Controls.Add(txtAddress);
+            card.Controls.Add(lblEmail);
+            card.Controls.Add(txtEmailCreate);
+            card.Controls.Add(lblPassword);
+            card.Controls.Add(txtPasswordCreate);
+            card.Controls.Add(btnCreate);
+            card.Controls.Add(btnGoLogin);
+            card.Controls.Add(btnBackCreate);
+            this.Controls.Add(card);
         }
 
         private void BtnCreate_Click(object sender, EventArgs e)

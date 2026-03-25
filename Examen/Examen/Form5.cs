@@ -308,80 +308,115 @@ namespace Examen
 
         private void InitializeFormControls()
         {
-            // basic layout
-            this.Text = "Sistema de ventas - Form5";
-            this.Size = new Size(980, 640);
-            this.BackColor = Color.FromArgb(255, 230, 0);
+            this.Text = "Mercado Libre - Tienda";
+            this.Size = new Size(1020, 720);
+            this.BackColor = Color.FromArgb(255, 253, 240); // ML pastel cream
             this.Font = new Font("Segoe UI", 9.5f);
+            this.StartPosition = FormStartPosition.CenterScreen;
 
-            Label lblProducto = new Label { Text = "Producto:", Location = new Point(10, 10), AutoSize = true, ForeColor = Color.FromArgb(0,85,165) };
-            cmbProductosLocal = new ComboBox { Location = new Point(100, 10), Width = 300, DropDownStyle = ComboBoxStyle.DropDownList };
-            Label lblCantidad = new Label { Text = "Cantidad:", Location = new Point(10, 45), AutoSize = true, ForeColor = Color.FromArgb(0,85,165) };
-            numCantidadLocal = new NumericUpDown { Location = new Point(100, 45), Width = 100, Minimum = 1, Value = 1 };
+            // Top header panel (ML gold)
+            Panel topHeader = new Panel
+            {
+                Size = new Size(1020, 50),
+                Location = new Point(0, 0),
+                BackColor = Color.FromArgb(255, 214, 0),
+                Dock = DockStyle.Top
+            };
+            Label lblStoreTitle = new Label
+            {
+                Text = "Mercado Libre - Tienda",
+                Font = new Font("Segoe UI", 14f, FontStyle.Bold),
+                ForeColor = Color.FromArgb(50, 40, 10),
+                AutoSize = true,
+                Location = new Point(18, 12),
+                BackColor = Color.Transparent
+            };
+            topHeader.Controls.Add(lblStoreTitle);
 
-            btnAgregarLocal = new Button { Text = "Agregar al carrito", Location = new Point(220, 40), Size = new Size(180, 30), BackColor = Color.FromArgb(0,85,165), ForeColor = Color.White, FlatStyle = FlatStyle.Flat };
-            btnVerCarritoLocal = new Button { Text = "Ver carrito", Location = new Point(410, 40), Size = new Size(120, 30), BackColor = Color.White, ForeColor = Color.FromArgb(0,85,165), FlatStyle = FlatStyle.Flat };
+            // Product selection area
+            Label lblProducto = new Label { Text = "Producto:", Location = new Point(18, 66), AutoSize = true, ForeColor = Color.FromArgb(90, 80, 60), Font = new Font("Segoe UI", 10f, FontStyle.Bold) };
+            cmbProductosLocal = new ComboBox { Location = new Point(100, 62), Width = 320, DropDownStyle = ComboBoxStyle.DropDownList, Font = new Font("Segoe UI", 9.5f) };
+            Label lblCantidad = new Label { Text = "Cantidad:", Location = new Point(440, 66), AutoSize = true, ForeColor = Color.FromArgb(90, 80, 60) };
+            numCantidadLocal = new NumericUpDown { Location = new Point(510, 62), Width = 80, Minimum = 1, Value = 1, Font = new Font("Segoe UI", 9.5f) };
 
-            lstCarritoLocal = new ListBox { Location = new Point(650, 120), Size = new Size(300, 220), SelectionMode = SelectionMode.MultiExtended, BorderStyle = BorderStyle.FixedSingle };
-            Label lblCarrito = new Label { Text = "Carrito (seleccione productos para cancelar):", Location = new Point(650, 100), AutoSize = true, BackColor = Color.Transparent, ForeColor = Color.FromArgb(0,85,165) };
+            btnAgregarLocal = new Button { Text = "Agregar al carrito", Location = new Point(610, 58), Size = new Size(170, 34), BackColor = Color.FromArgb(255, 202, 40), ForeColor = Color.FromArgb(50, 40, 10), FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9.5f, FontStyle.Bold), Cursor = Cursors.Hand };
+            btnAgregarLocal.FlatAppearance.BorderSize = 0;
+            btnVerCarritoLocal = new Button { Text = "Confirmar compra", Location = new Point(790, 58), Size = new Size(160, 34), BackColor = Color.FromArgb(66, 165, 245), ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9.5f, FontStyle.Bold), Cursor = Cursors.Hand };
+            btnVerCarritoLocal.FlatAppearance.BorderSize = 0;
 
-            // payment group
-            grpPagoLocal = new GroupBox { Text = "Método de pago", Location = new Point(10, 100), Size = new Size(620, 140), BackColor = Color.White };
-            rdoContadoLocal = new RadioButton { Text = "Contado", Location = new Point(10, 20), AutoSize = true };
-            rdoTarjetaMSILocal = new RadioButton { Text = "Tarjeta crédito (MSI)", Location = new Point(120, 20), AutoSize = true };
-            rdoMercadoPagoLocal = new RadioButton { Text = "Mercado Pago", Location = new Point(320, 20), AutoSize = true };
+            // Cart panel (right side)
+            Panel pnlCart = new Panel { Location = new Point(640, 108), Size = new Size(340, 240), BackColor = Color.White };
+            pnlCart.Paint += (s, ev) => { ev.Graphics.DrawRectangle(new Pen(Color.FromArgb(255, 236, 179)), 0, 0, pnlCart.Width - 1, pnlCart.Height - 1); };
+            Label lblCarrito = new Label { Text = "🛒 Carrito", Location = new Point(10, 6), AutoSize = true, BackColor = Color.Transparent, ForeColor = Color.FromArgb(245, 166, 35), Font = new Font("Segoe UI", 10f, FontStyle.Bold) };
+            lstCarritoLocal = new ListBox { Location = new Point(4, 30), Size = new Size(332, 206), SelectionMode = SelectionMode.MultiExtended, BorderStyle = BorderStyle.None, BackColor = Color.White, Font = new Font("Segoe UI", 9f) };
+            pnlCart.Controls.Add(lblCarrito);
+            pnlCart.Controls.Add(lstCarritoLocal);
 
-            cmbContadoOpcionesLocal = new ComboBox { Location = new Point(10, 50), Width = 200, DropDownStyle = ComboBoxStyle.DropDownList };
+            // Payment panel (left side)
+            Panel pnlPago = new Panel { Location = new Point(18, 108), Size = new Size(600, 150), BackColor = Color.White };
+            pnlPago.Paint += (s, ev) =>
+            {
+                ev.Graphics.FillRectangle(new SolidBrush(Color.FromArgb(66, 165, 245)), 0, 0, 5, pnlPago.Height);
+                ev.Graphics.DrawRectangle(new Pen(Color.FromArgb(187, 222, 251)), 0, 0, pnlPago.Width - 1, pnlPago.Height - 1);
+            };
+            Label lblPagoTitle = new Label { Text = "Método de pago", Font = new Font("Segoe UI", 10f, FontStyle.Bold), ForeColor = Color.FromArgb(30, 136, 229), Location = new Point(16, 6), AutoSize = true, BackColor = Color.Transparent };
+            grpPagoLocal = new GroupBox { Location = new Point(0, 0), Size = new Size(0, 0), Visible = false };
+            rdoContadoLocal = new RadioButton { Text = "Contado", Location = new Point(16, 30), AutoSize = true, Font = new Font("Segoe UI", 9f) };
+            rdoTarjetaMSILocal = new RadioButton { Text = "Tarjeta crédito (MSI)", Location = new Point(140, 30), AutoSize = true, Font = new Font("Segoe UI", 9f) };
+            rdoMercadoPagoLocal = new RadioButton { Text = "Mercado Pago", Location = new Point(340, 30), AutoSize = true, Font = new Font("Segoe UI", 9f) };
+
+            cmbContadoOpcionesLocal = new ComboBox { Location = new Point(16, 58), Width = 180, DropDownStyle = ComboBoxStyle.DropDownList, Font = new Font("Segoe UI", 9f) };
             cmbContadoOpcionesLocal.Items.AddRange(new object[] { "Deposito", "Tarjeta débito", "Tarjeta crédito" });
             cmbContadoOpcionesLocal.SelectedIndex = 0;
 
-            cmbMSIMesesLocal = new ComboBox { Location = new Point(220, 50), Width = 120, DropDownStyle = ComboBoxStyle.DropDownList };
+            cmbMSIMesesLocal = new ComboBox { Location = new Point(210, 58), Width = 120, DropDownStyle = ComboBoxStyle.DropDownList, Font = new Font("Segoe UI", 9f) };
             cmbMSIMesesLocal.Items.AddRange(new object[] { "3", "6", "12" });
             cmbMSIMesesLocal.SelectedIndex = 0;
 
-            cmbMPOpcionesLocal = new ComboBox { Location = new Point(360, 50), Width = 240, DropDownStyle = ComboBoxStyle.DropDownList };
+            cmbMPOpcionesLocal = new ComboBox { Location = new Point(340, 58), Width = 240, DropDownStyle = ComboBoxStyle.DropDownList, Font = new Font("Segoe UI", 9f) };
             cmbMPOpcionesLocal.Items.AddRange(new object[] { "Contado", "3 meses (10% mensual)", "6 meses (10% mensual)" });
             cmbMPOpcionesLocal.SelectedIndex = 0;
 
-            btnResumenLocal = new Button { Text = "Ver resumen", Location = new Point(10, 90), Size = new Size(150, 30), BackColor = Color.FromArgb(0,85,165), ForeColor = Color.White, FlatStyle = FlatStyle.Flat };
+            btnResumenLocal = new Button { Text = "Ver resumen", Location = new Point(16, 100), Size = new Size(150, 34), BackColor = Color.FromArgb(232, 245, 233), ForeColor = Color.FromArgb(27, 94, 32), FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9f, FontStyle.Bold), Cursor = Cursors.Hand };
+            btnResumenLocal.FlatAppearance.BorderColor = Color.FromArgb(165, 214, 167);
 
-            grpPagoLocal.Controls.Add(rdoContadoLocal);
-            grpPagoLocal.Controls.Add(rdoTarjetaMSILocal);
-            grpPagoLocal.Controls.Add(rdoMercadoPagoLocal);
-            grpPagoLocal.Controls.Add(cmbContadoOpcionesLocal);
-            grpPagoLocal.Controls.Add(cmbMSIMesesLocal);
-            grpPagoLocal.Controls.Add(cmbMPOpcionesLocal);
-            grpPagoLocal.Controls.Add(btnResumenLocal);
+            pnlPago.Controls.Add(lblPagoTitle);
+            pnlPago.Controls.Add(rdoContadoLocal);
+            pnlPago.Controls.Add(rdoTarjetaMSILocal);
+            pnlPago.Controls.Add(rdoMercadoPagoLocal);
+            pnlPago.Controls.Add(cmbContadoOpcionesLocal);
+            pnlPago.Controls.Add(cmbMSIMesesLocal);
+            pnlPago.Controls.Add(cmbMPOpcionesLocal);
+            pnlPago.Controls.Add(btnResumenLocal);
 
-            // Account UI moved to separate forms (Form6, Form7, Form8)
-
-            // shipping controls (below payment)
-            Label lblEnvio = new Label { Text = "Envío:", Location = new Point(10, 290), AutoSize = true, ForeColor = Color.FromArgb(0,85,165) };
-            rdoEnvioNormal = new RadioButton { Text = "Normal", Location = new Point(70, 288), AutoSize = true };
-            rdoEnvioFull = new RadioButton { Text = "Full", Location = new Point(180, 288), AutoSize = true };
+            // Shipping & cancellation row
+            Label lblEnvio = new Label { Text = "Envío:", Location = new Point(18, 272), AutoSize = true, ForeColor = Color.FromArgb(90, 80, 60), Font = new Font("Segoe UI", 9f, FontStyle.Bold) };
+            rdoEnvioNormal = new RadioButton { Text = "Normal", Location = new Point(80, 270), AutoSize = true, Font = new Font("Segoe UI", 9f) };
+            rdoEnvioFull = new RadioButton { Text = "Full", Location = new Point(170, 270), AutoSize = true, Font = new Font("Segoe UI", 9f) };
             rdoEnvioNormal.Checked = true;
 
-            // cancellation controls
-            cmbCancelReasons = new ComboBox { Location = new Point(10, 340), Width = 300, DropDownStyle = ComboBoxStyle.DropDownList };
+            cmbCancelReasons = new ComboBox { Location = new Point(260, 268), Width = 220, DropDownStyle = ComboBoxStyle.DropDownList, Font = new Font("Segoe UI", 9f) };
             cmbCancelReasons.Items.AddRange(new object[] { "Derecho de compra", "Producto defectuoso", "Producto con demora" });
             cmbCancelReasons.SelectedIndex = 0;
-            chkCancelarTodo = new CheckBox { Text = "Cancelar todo el carrito", Location = new Point(320, 340), AutoSize = true };
-            btnCancelarLocal = new Button { Text = "Cancelar compra", Location = new Point(500, 335), Size = new Size(150, 30), BackColor = Color.White, ForeColor = Color.FromArgb(0,85,165), FlatStyle = FlatStyle.Flat };
+            chkCancelarTodo = new CheckBox { Text = "Cancelar todo", Location = new Point(500, 270), AutoSize = true, Font = new Font("Segoe UI", 9f) };
+            btnCancelarLocal = new Button { Text = "Cancelar compra", Location = new Point(640, 264), Size = new Size(160, 34), BackColor = Color.FromArgb(255, 235, 238), ForeColor = Color.FromArgb(198, 40, 40), FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9f, FontStyle.Bold), Cursor = Cursors.Hand };
+            btnCancelarLocal.FlatAppearance.BorderColor = Color.FromArgb(239, 154, 154);
 
+            this.Controls.Add(topHeader);
             this.Controls.Add(lblEnvio);
             this.Controls.Add(rdoEnvioNormal);
             this.Controls.Add(rdoEnvioFull);
             this.Controls.Add(cmbCancelReasons);
             this.Controls.Add(chkCancelarTodo);
             this.Controls.Add(btnCancelarLocal);
-            this.Controls.Add(lblCarrito);
 
-            // post-sale controls (sales list and items) moved down
-            Label lblVentas = new Label { Text = "Ventas registradas:", Location = new Point(10, 420), AutoSize = true, BackColor = Color.Transparent, ForeColor = Color.FromArgb(0,85,165) };
-            lstVentas = new ListBox { Location = new Point(10, 440), Size = new Size(480, 120), BorderStyle = BorderStyle.FixedSingle };
-            lstVentaItems = new ListBox { Location = new Point(500, 440), Size = new Size(300, 120), SelectionMode = SelectionMode.MultiExtended, BorderStyle = BorderStyle.FixedSingle };
-            btnCancelarVenta = new Button { Text = "Cancelar venta seleccionada", Location = new Point(10, 570), Size = new Size(220, 30) };
-            chkCancelarVentaTodo = new CheckBox { Text = "Cancelar toda la venta", Location = new Point(240, 575), AutoSize = true };
+            // Sales history section
+            Label lblVentas = new Label { Text = "📦 Ventas registradas", Location = new Point(18, 310), AutoSize = true, BackColor = Color.Transparent, ForeColor = Color.FromArgb(69, 90, 100), Font = new Font("Segoe UI", 10f, FontStyle.Bold) };
+            lstVentas = new ListBox { Location = new Point(18, 334), Size = new Size(560, 150), BorderStyle = BorderStyle.FixedSingle, BackColor = Color.White, Font = new Font("Segoe UI", 9f) };
+            lstVentaItems = new ListBox { Location = new Point(590, 334), Size = new Size(390, 150), SelectionMode = SelectionMode.MultiExtended, BorderStyle = BorderStyle.FixedSingle, BackColor = Color.White, Font = new Font("Segoe UI", 9f) };
+            btnCancelarVenta = new Button { Text = "Cancelar venta seleccionada", Location = new Point(18, 492), Size = new Size(240, 34), BackColor = Color.FromArgb(255, 243, 224), ForeColor = Color.FromArgb(230, 126, 34), FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9f, FontStyle.Bold), Cursor = Cursors.Hand };
+            btnCancelarVenta.FlatAppearance.BorderColor = Color.FromArgb(255, 224, 178);
+            chkCancelarVentaTodo = new CheckBox { Text = "Cancelar toda la venta", Location = new Point(280, 498), AutoSize = true, Font = new Font("Segoe UI", 9f) };
 
             this.Controls.Add(lblVentas);
             this.Controls.Add(lstVentas);
@@ -389,18 +424,18 @@ namespace Examen
             this.Controls.Add(btnCancelarVenta);
             this.Controls.Add(chkCancelarVentaTodo);
 
-            // add to form
             this.Controls.Add(lblProducto);
             this.Controls.Add(cmbProductosLocal);
             this.Controls.Add(lblCantidad);
             this.Controls.Add(numCantidadLocal);
             this.Controls.Add(btnAgregarLocal);
             this.Controls.Add(btnVerCarritoLocal);
-            this.Controls.Add(lstCarritoLocal);
-            this.Controls.Add(grpPagoLocal);
+            this.Controls.Add(pnlCart);
+            this.Controls.Add(pnlPago);
 
-            // Back button to return to previous form
-            btnBackStore = new Button { Text = "Atrás", Location = new Point(780, 350), Size = new Size(120, 30), BackColor = Color.White, ForeColor = Color.FromArgb(0,85,165), FlatStyle = FlatStyle.Flat };
+            // Back button
+            btnBackStore = new Button { Text = "← Volver", Location = new Point(820, 264), Size = new Size(120, 34), BackColor = Color.Transparent, ForeColor = Color.FromArgb(66, 165, 245), FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9f, FontStyle.Bold), Cursor = Cursors.Hand };
+            btnBackStore.FlatAppearance.BorderSize = 0;
             btnBackStore.Click += (s, e) => { if (this.Owner != null) this.Owner.Show(); this.Close(); };
             this.Controls.Add(btnBackStore);
 

@@ -25,31 +25,157 @@ namespace Examen
 
         private void InitializeMenuControls()
         {
-            this.Text = "Menú principal";
-            this.Size = new Size(460, 260);
-            this.BackColor = Color.FromArgb(255, 230, 0);
+            this.Text = "Panel Principal";
+            this.Size = new Size(600, 480);
+            this.BackColor = Color.FromArgb(245, 248, 255); // very light blue-white
             this.Font = new Font("Segoe UI", 10f);
-            Label lbl = new Label { Text = "Menú principal", Location = new Point(12, 12), Font = new Font("Segoe UI", 14f, FontStyle.Bold), AutoSize = true, ForeColor = Color.FromArgb(0,85,165) };
-            btnOpenStore = new Button { Text = "Abrir tienda (compras)", Location = new Point(10, 50), Size = new Size(380, 36) };
-            btnOpenStore.BackColor = Color.White; btnOpenStore.FlatStyle = FlatStyle.Flat; btnOpenStore.ForeColor = Color.FromArgb(0,85,165);
-            btnAccountSummaryMenu = new Button { Text = "Resumen de mi cuenta", Location = new Point(12, 100), Size = new Size(210, 40) };
-            btnAccountOps = new Button { Text = "Operaciones de cuenta", Location = new Point(236, 100), Size = new Size(210, 40) };
-            btnAccountSummaryMenu.BackColor = Color.White; btnAccountSummaryMenu.FlatStyle = FlatStyle.Flat; btnAccountSummaryMenu.ForeColor = Color.FromArgb(0,85,165);
-            btnAccountOps.BackColor = Color.White; btnAccountOps.FlatStyle = FlatStyle.Flat; btnAccountOps.ForeColor = Color.FromArgb(0,85,165);
-            btnLogout = new Button { Text = "Cerrar sesión", Location = new Point(12, 150), Size = new Size(434, 40) };
-            btnLogout.BackColor = Color.FromArgb(0,85,165); btnLogout.FlatStyle = FlatStyle.Flat; btnLogout.ForeColor = Color.White;
+            this.FormBorderStyle = FormBorderStyle.FixedSingle;
+            this.MaximizeBox = false;
+            this.StartPosition = FormStartPosition.CenterScreen;
+
+            // Top header panel with MP blue gradient look
+            Panel headerPanel = new Panel
+            {
+                Size = new Size(600, 80),
+                Location = new Point(0, 0),
+                BackColor = Color.FromArgb(66, 165, 245),
+                Dock = DockStyle.Top
+            };
+            Label lblWelcome = new Label
+            {
+                Text = "Bienvenido",
+                Font = new Font("Segoe UI", 18f, FontStyle.Bold),
+                ForeColor = Color.White,
+                AutoSize = true,
+                Location = new Point(24, 12)
+            };
+            Label lblUser = new Label
+            {
+                Text = "",
+                Font = new Font("Segoe UI", 10f),
+                ForeColor = Color.FromArgb(227, 242, 253),
+                AutoSize = true,
+                Location = new Point(24, 48)
+            };
+            // Show current user info
+            var acct = AccountManager.CurrentAccount;
+            if (acct != null)
+            {
+                lblWelcome.Text = $"Hola, {acct.Owner}";
+                lblUser.Text = $"Tarjeta: {acct.CardNumber}  |  Saldo: ${acct.Balance:0.00}";
+            }
+            headerPanel.Controls.Add(lblWelcome);
+            headerPanel.Controls.Add(lblUser);
+
+            // Navigation cards area
+            int cardY = 100;
+            int cardW = 250;
+            int cardH = 110;
+            int gap = 20;
+            int leftX = 36;
+            int rightX = leftX + cardW + gap;
+
+            // Card 1: Tienda (ML yellow)
+            Panel cardStore = CreateMenuCard(leftX, cardY, cardW, cardH,
+                "🛒  Tienda", "Explora productos y compra",
+                Color.FromArgb(255, 249, 196), Color.FromArgb(255, 202, 40), Color.FromArgb(90, 70, 10));
+            cardStore.Click += (s, e) => BtnOpenStore_Click(s, e);
+            foreach (Control c in cardStore.Controls) c.Click += (s, e) => BtnOpenStore_Click(s, e);
+
+            // Card 2: Operaciones (MP blue)
+            Panel cardOps = CreateMenuCard(rightX, cardY, cardW, cardH,
+                "💳  Operaciones", "Ingresos, transferencias y retiros",
+                Color.FromArgb(227, 242, 253), Color.FromArgb(66, 165, 245), Color.FromArgb(21, 101, 192));
+            cardOps.Click += (s, e) => BtnAccountOps_Click(s, e);
+            foreach (Control c in cardOps.Controls) c.Click += (s, e) => BtnAccountOps_Click(s, e);
+
+            // Card 3: Informe global (green pastel)
+            Panel cardReport = CreateMenuCard(leftX, cardY + cardH + gap, cardW, cardH,
+                "📊  Informe global", "Resumen de todas las cuentas",
+                Color.FromArgb(232, 245, 233), Color.FromArgb(102, 187, 106), Color.FromArgb(27, 94, 32));
+            cardReport.Click += (s, e) => BtnAccountSummaryMenu_Click(s, e);
+            foreach (Control c in cardReport.Controls) c.Click += (s, e) => BtnAccountSummaryMenu_Click(s, e);
+
+            // Card 4: Cerrar sesión (warm coral)
+            Panel cardLogout = CreateMenuCard(rightX, cardY + cardH + gap, cardW, cardH,
+                "🚪  Cerrar sesión", "Salir de tu cuenta",
+                Color.FromArgb(255, 235, 238), Color.FromArgb(229, 115, 115), Color.FromArgb(183, 28, 28));
+            cardLogout.Click += (s, e) => BtnLogout_Click(s, e);
+            foreach (Control c in cardLogout.Controls) c.Click += (s, e) => BtnLogout_Click(s, e);
+
+            // Hidden buttons (keep for event handlers)
+            btnOpenStore = new Button { Visible = false };
+            btnAccountSummaryMenu = new Button { Visible = false };
+            btnAccountOps = new Button { Visible = false };
+            btnLogout = new Button { Visible = false };
 
             btnOpenStore.Click += BtnOpenStore_Click;
             btnAccountSummaryMenu.Click += BtnAccountSummaryMenu_Click;
             btnAccountOps.Click += BtnAccountOps_Click;
             btnLogout.Click += BtnLogout_Click;
 
-            this.Controls.Add(lbl);
-            this.Controls.Add(btnOpenStore);
-            this.Controls.Add(btnAccountSummaryMenu);
-            this.Controls.Add(btnAccountOps);
-            this.Controls.Add(btnLogout);
-            AddBackButton();
+            // Back link at bottom
+            btnBackMenu = new Button
+            {
+                Text = "← Volver",
+                Location = new Point(24, 390),
+                Size = new Size(120, 34),
+                BackColor = Color.Transparent,
+                ForeColor = Color.FromArgb(66, 165, 245),
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Segoe UI", 9f, FontStyle.Bold),
+                Cursor = Cursors.Hand
+            };
+            btnBackMenu.FlatAppearance.BorderSize = 0;
+            btnBackMenu.Click += (s, e) => { if (this.Owner != null) this.Owner.Show(); this.Close(); };
+
+            this.Controls.Add(headerPanel);
+            this.Controls.Add(cardStore);
+            this.Controls.Add(cardOps);
+            this.Controls.Add(cardReport);
+            this.Controls.Add(cardLogout);
+            this.Controls.Add(btnBackMenu);
+        }
+
+        private Panel CreateMenuCard(int x, int y, int w, int h, string title, string desc, Color bgColor, Color accentColor, Color textColor)
+        {
+            Panel card = new Panel
+            {
+                Location = new Point(x, y),
+                Size = new Size(w, h),
+                BackColor = bgColor,
+                Cursor = Cursors.Hand
+            };
+            card.Paint += (s, ev) =>
+            {
+                // left accent bar
+                ev.Graphics.FillRectangle(new SolidBrush(accentColor), 0, 0, 5, h);
+                // border
+                ev.Graphics.DrawRectangle(new Pen(accentColor, 1), 0, 0, w - 1, h - 1);
+            };
+            Label lblT = new Label
+            {
+                Text = title,
+                Font = new Font("Segoe UI", 13f, FontStyle.Bold),
+                ForeColor = textColor,
+                AutoSize = true,
+                Location = new Point(16, 20),
+                BackColor = Color.Transparent,
+                Cursor = Cursors.Hand
+            };
+            Label lblD = new Label
+            {
+                Text = desc,
+                Font = new Font("Segoe UI", 9f),
+                ForeColor = Color.FromArgb(100, 100, 100),
+                AutoSize = true,
+                Location = new Point(16, 56),
+                BackColor = Color.Transparent,
+                Cursor = Cursors.Hand
+            };
+            card.Controls.Add(lblT);
+            card.Controls.Add(lblD);
+            return card;
         }
 
         private void BtnOpenStore_Click(object sender, EventArgs e)
@@ -65,13 +191,13 @@ namespace Examen
             // Global report across all accounts
             var accounts = AccountManager.Accounts;
             var sb = new StringBuilder();
-            sb.AppendLine("INFORME GLOBAL DEL SISTEMA");
+            sb.AppendLine($"  Cuentas creadas: {accounts.Count}");
+            sb.AppendLine($"  Intentos fallidos (global): {AccountManager.TotalFailedLoginAttempts}");
             sb.AppendLine();
-            sb.AppendLine($"Total cuentas creadas: {accounts.Count}");
-            sb.AppendLine($"Intentos fallidos de inicio de sesión (global): {AccountManager.TotalFailedLoginAttempts}");
-            sb.AppendLine();
+            sb.AppendLine("══════════════════════════════════════");
+            sb.AppendLine("  INGRESOS (por tipo)");
+            sb.AppendLine("══════════════════════════════════════");
 
-            // Aggregate deposits
             var depositCounts = new Dictionary<string, int>();
             var depositTotals = new Dictionary<string, decimal>();
             foreach (var ac in accounts)
@@ -87,22 +213,20 @@ namespace Examen
                     depositTotals[k] += ac.DepositTotals[k];
                 }
             }
-
-            sb.AppendLine("INGRESOS (por tipo):");
-            // ensure common keys appear even if zero
             var depositKeys = new List<string> { "Oxxo/7Eleven", "Depósito bancario", "Transferencia", "Dinero desde el extranjero (USD)" };
-            // include any bank-specific deposit keys
             depositKeys.AddRange(depositTotals.Keys.Where(k => k.StartsWith("Depósito bancario - ") && !depositKeys.Contains(k)));
             depositKeys = depositKeys.Distinct().ToList();
             foreach (var k in depositKeys)
             {
                 int cnt = depositCounts.ContainsKey(k) ? depositCounts[k] : 0;
                 decimal tot = depositTotals.ContainsKey(k) ? depositTotals[k] : 0m;
-                sb.AppendLine($" - {k}: {cnt} operaciones - ${tot:0.00}");
+                sb.AppendLine($"   • {k}: {cnt} ops — ${tot:0.00}");
             }
 
             sb.AppendLine();
-            // Aggregate transfers
+            sb.AppendLine("──────────────────────────────────────");
+            sb.AppendLine("  TRANSFERENCIAS (por banco)");
+            sb.AppendLine("──────────────────────────────────────");
             var transferCounts = new Dictionary<string, int>();
             var transferTotals = new Dictionary<string, decimal>();
             foreach (var ac in accounts)
@@ -118,18 +242,19 @@ namespace Examen
                     transferTotals[k] += ac.TransferTotals[k];
                 }
             }
-            sb.AppendLine("TRANSFERENCIAS (por banco):");
             var banks = new List<string> { "BBVA", "Santander", "Banorte", "HSBC", "Banamex" };
             banks.AddRange(transferTotals.Keys.Where(k => !banks.Contains(k)));
             foreach (var b in banks)
             {
                 int cnt = transferCounts.ContainsKey(b) ? transferCounts[b] : 0;
                 decimal tot = transferTotals.ContainsKey(b) ? transferTotals[b] : 0m;
-                sb.AppendLine($" - {b}: {cnt} transferencias - ${tot:0.00}");
+                sb.AppendLine($"   • {b}: {cnt} transferencias — ${tot:0.00}");
             }
 
             sb.AppendLine();
-            // Aggregate withdrawals
+            sb.AppendLine("──────────────────────────────────────");
+            sb.AppendLine("  RETIROS (por proveedor)");
+            sb.AppendLine("──────────────────────────────────────");
             var withdrawCounts = new Dictionary<string, int>();
             var withdrawTotals = new Dictionary<string, decimal>();
             foreach (var ac in accounts)
@@ -145,17 +270,18 @@ namespace Examen
                     withdrawTotals[k] += ac.WithdrawTotals[k];
                 }
             }
-            sb.AppendLine("RETIROS (por proveedor):");
             var providers = new List<string> { "Mercado Pago Express", "7-Eleven", "Soriana", "Chedraui", "Aurrera", "Walmart" };
             foreach (var p in providers)
             {
                 int cnt = withdrawCounts.ContainsKey(p) ? withdrawCounts[p] : 0;
                 decimal tot = withdrawTotals.ContainsKey(p) ? withdrawTotals[p] : 0m;
-                sb.AppendLine($" - {p}: {cnt} retiros - ${tot:0.00}");
+                sb.AppendLine($"   • {p}: {cnt} retiros — ${tot:0.00}");
             }
 
             sb.AppendLine();
-            // Totals and commissions
+            sb.AppendLine("══════════════════════════════════════");
+            sb.AppendLine("  TOTALES DEL SISTEMA");
+            sb.AppendLine("══════════════════════════════════════");
             decimal totalIngresos = depositTotals.Values.Sum();
             decimal totalTransferencias = transferTotals.Values.Sum();
             decimal totalRetiros = withdrawTotals.Values.Sum();
@@ -175,14 +301,79 @@ namespace Examen
             }
             decimal totalSaldos = accounts.Sum(a => a.Balance);
 
-            sb.AppendLine("TOTALES DEL SISTEMA:");
-            sb.AppendLine($" - Ingresos totales: ${totalIngresos:0.00}");
-            sb.AppendLine($" - Transferencias totales: ${totalTransferencias:0.00}");
-            sb.AppendLine($" - Retiros totales: ${totalRetiros:0.00}");
-            sb.AppendLine($" - Comisiones totales: ${totalComisiones:0.00}");
-            sb.AppendLine($" - Suma de saldos (todos): ${totalSaldos:0.00}");
+            sb.AppendLine($"  Ingresos totales:         ${totalIngresos:0.00}");
+            sb.AppendLine($"  Transferencias totales:   ${totalTransferencias:0.00}");
+            sb.AppendLine($"  Retiros totales:          ${totalRetiros:0.00}");
+            sb.AppendLine($"  Comisiones totales:       ${totalComisiones:0.00}");
+            sb.AppendLine($"  Suma de saldos (todos):   ${totalSaldos:0.00}");
 
-            MessageBox.Show(sb.ToString(), "Informe global", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            ShowStyledReport("Informe Global del Sistema", sb.ToString(), Color.FromArgb(102, 187, 106));
+        }
+
+        private void ShowStyledReport(string title, string content, Color accentColor)
+        {
+            using (Form dlg = new Form())
+            {
+                dlg.Text = title;
+                dlg.Size = new Size(540, 500);
+                dlg.FormBorderStyle = FormBorderStyle.FixedDialog;
+                dlg.StartPosition = FormStartPosition.CenterParent;
+                dlg.MaximizeBox = false;
+                dlg.MinimizeBox = false;
+                dlg.BackColor = Color.White;
+                dlg.Font = new Font("Segoe UI", 10f);
+
+                Panel header = new Panel
+                {
+                    Dock = DockStyle.Top,
+                    Height = 50,
+                    BackColor = accentColor
+                };
+                Label lblTitle = new Label
+                {
+                    Text = title,
+                    Font = new Font("Segoe UI", 14f, FontStyle.Bold),
+                    ForeColor = Color.White,
+                    AutoSize = true,
+                    Location = new Point(16, 12),
+                    BackColor = Color.Transparent
+                };
+                header.Controls.Add(lblTitle);
+
+                TextBox txtReport = new TextBox
+                {
+                    Multiline = true,
+                    ReadOnly = true,
+                    ScrollBars = ScrollBars.Vertical,
+                    Location = new Point(12, 62),
+                    Size = new Size(500, 350),
+                    Font = new Font("Consolas", 9.5f),
+                    BackColor = Color.FromArgb(250, 252, 255),
+                    ForeColor = Color.FromArgb(40, 40, 40),
+                    BorderStyle = BorderStyle.FixedSingle,
+                    Text = content
+                };
+
+                Button btnClose = new Button
+                {
+                    Text = "Cerrar",
+                    Size = new Size(120, 36),
+                    Location = new Point(392, 420),
+                    BackColor = accentColor,
+                    ForeColor = Color.White,
+                    FlatStyle = FlatStyle.Flat,
+                    Font = new Font("Segoe UI", 10f, FontStyle.Bold),
+                    Cursor = Cursors.Hand,
+                    DialogResult = DialogResult.OK
+                };
+                btnClose.FlatAppearance.BorderSize = 0;
+
+                dlg.Controls.Add(header);
+                dlg.Controls.Add(txtReport);
+                dlg.Controls.Add(btnClose);
+                dlg.AcceptButton = btnClose;
+                dlg.ShowDialog(this);
+            }
         }
 
         private void BtnLogout_Click(object sender, EventArgs e)
@@ -207,13 +398,7 @@ namespace Examen
             this.Hide();
         }
 
-        // Back button to return to previous form
+        // Back button field (used in InitializeMenuControls)
         private Button btnBackMenu;
-        private void AddBackButton()
-        {
-            btnBackMenu = new Button { Text = "Atrás", Location = new Point(12, 200), Size = new Size(80, 28), BackColor = Color.White, ForeColor = Color.FromArgb(0,85,165), FlatStyle = FlatStyle.Flat };
-            btnBackMenu.Click += (s, e) => { if (this.Owner != null) this.Owner.Show(); this.Close(); };
-            this.Controls.Add(btnBackMenu);
-        }
     }
 }

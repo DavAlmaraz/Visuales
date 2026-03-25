@@ -31,96 +31,195 @@ namespace Examen
         private Label lblAcct;
         private ComboBox cmbDepositBank;
         private Button btnBackOps;
-        private ListBox lstAcctHistory;
+        private DataGridView historyGrid;
 
         private void InitializeAccountOperations()
         {
-            // Mercado Libre inspired colors
-            this.Text = "Operaciones de cuenta";
-            this.Size = new Size(740, 520);
-            this.BackColor = Color.FromArgb(255, 230, 0); // ML yellow
-            this.Font = new Font("Segoe UI", 9f);
+            this.Text = "Mercado Pago - Operaciones";
+            this.Size = new Size(820, 600);
+            this.BackColor = Color.FromArgb(236, 244, 255); // pastel MP light blue
+            this.Font = new Font("Segoe UI", 9.5f);
+            this.FormBorderStyle = FormBorderStyle.FixedSingle;
+            this.MaximizeBox = false;
+            this.StartPosition = FormStartPosition.CenterScreen;
 
-            lblAcct = new Label { Text = "Cuenta: (sin sesión)", Location = new Point(12, 12), AutoSize = true, ForeColor = Color.FromArgb(0, 85, 165) };
+            // Top banner
+            Panel topBanner = new Panel
+            {
+                Size = new Size(820, 56),
+                Location = new Point(0, 0),
+                BackColor = Color.FromArgb(66, 165, 245),
+                Dock = DockStyle.Top
+            };
+            lblAcct = new Label
+            {
+                Text = "Cuenta: (sin sesión)",
+                Location = new Point(18, 16),
+                AutoSize = true,
+                ForeColor = Color.White,
+                Font = new Font("Segoe UI", 12f, FontStyle.Bold),
+                BackColor = Color.Transparent
+            };
+            topBanner.Controls.Add(lblAcct);
 
-            // Deposit group
-            var grpDeposit = new GroupBox { Text = "Ingresar dinero", Location = new Point(12, 40), Size = new Size(340, 160), BackColor = Color.White };
-            cmbDepositType = new ComboBox { Location = new Point(12, 22), Width = 250, DropDownStyle = ComboBoxStyle.DropDownList };
+            // --- Deposit panel (ML yellow pastel) ---
+            Panel pnlDeposit = new Panel
+            {
+                Location = new Point(14, 70),
+                Size = new Size(380, 180),
+                BackColor = Color.White
+            };
+            pnlDeposit.Paint += (s, ev) =>
+            {
+                ev.Graphics.FillRectangle(new SolidBrush(Color.FromArgb(255, 202, 40)), 0, 0, 5, pnlDeposit.Height);
+                ev.Graphics.DrawRectangle(new Pen(Color.FromArgb(255, 236, 179)), 0, 0, pnlDeposit.Width - 1, pnlDeposit.Height - 1);
+            };
+            Label lblDepTitle = new Label { Text = "Ingresos", Font = new Font("Segoe UI", 11f, FontStyle.Bold), ForeColor = Color.FromArgb(245, 166, 35), Location = new Point(16, 8), AutoSize = true };
+            Label lblDepType = new Label { Text = "Tipo:", Font = new Font("Segoe UI", 8.5f), ForeColor = Color.Gray, Location = new Point(16, 34), AutoSize = true };
+            cmbDepositType = new ComboBox { Location = new Point(16, 52), Width = 240, DropDownStyle = ComboBoxStyle.DropDownList, Font = new Font("Segoe UI", 9f) };
             cmbDepositType.Items.AddRange(new object[] { "Oxxo/7Eleven", "Depósito bancario", "Transferencia", "Dinero desde el extranjero (USD)", "Dinero desde el extranjero (EUR)" });
             cmbDepositType.SelectedIndex = 0;
-            var lblBank = new Label { Text = "Banco (si depósito bancario):", Location = new Point(12, 86), AutoSize = true };
-            cmbDepositBank = new ComboBox { Location = new Point(12, 104), Width = 250, DropDownStyle = ComboBoxStyle.DropDownList };
-            // populate with same banks as transfer
+            Label lblDepAmt = new Label { Text = "Monto:", Font = new Font("Segoe UI", 8.5f), ForeColor = Color.Gray, Location = new Point(270, 34), AutoSize = true };
+            numDepositAmount = new NumericUpDown { Location = new Point(270, 52), Width = 96, Minimum = 1, Maximum = 100000, Value = 100, Font = new Font("Segoe UI", 9f) };
+            Label lblBank = new Label { Text = "Banco:", Font = new Font("Segoe UI", 8.5f), ForeColor = Color.Gray, Location = new Point(16, 82), AutoSize = true };
+            cmbDepositBank = new ComboBox { Location = new Point(16, 100), Width = 240, DropDownStyle = ComboBoxStyle.DropDownList, Font = new Font("Segoe UI", 9f) };
             var banks = new object[] { "BBVA", "Santander", "Banorte", "HSBC", "Banamex" };
             cmbDepositBank.Items.AddRange(banks);
             if (cmbDepositBank.Items.Count > 0) cmbDepositBank.SelectedIndex = 0;
-            var lblDepAmount = new Label { Text = "Monto:", Location = new Point(12, 54), AutoSize = true };
-            numDepositAmount = new NumericUpDown { Location = new Point(70, 52), Width = 120, Minimum = 1, Maximum = 100000, Value = 100 };
-            btnDeposit = new Button { Text = "Ingresar", Location = new Point(12, 130), Size = new Size(250, 30), BackColor = Color.FromArgb(0, 85, 165), ForeColor = Color.White, FlatStyle = FlatStyle.Flat };
+            btnDeposit = new Button { Text = "Ingresar", Location = new Point(16, 136), Size = new Size(350, 32), BackColor = Color.FromArgb(255, 202, 40), ForeColor = Color.FromArgb(50, 40, 10), FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9.5f, FontStyle.Bold), Cursor = Cursors.Hand };
+            btnDeposit.FlatAppearance.BorderSize = 0;
             btnDeposit.Click += BtnDeposit_Click;
-            grpDeposit.Controls.Add(cmbDepositType);
-            grpDeposit.Controls.Add(lblDepAmount);
-            grpDeposit.Controls.Add(numDepositAmount);
-            grpDeposit.Controls.Add(lblBank);
-            grpDeposit.Controls.Add(cmbDepositBank);
-            grpDeposit.Controls.Add(btnDeposit);
+            pnlDeposit.Controls.AddRange(new Control[] { lblDepTitle, lblDepType, cmbDepositType, lblDepAmt, numDepositAmount, lblBank, cmbDepositBank, btnDeposit });
 
             cmbDepositType.SelectedIndexChanged += (s, e) =>
             {
-                // enable bank combo only for bank deposit
                 var isBank = cmbDepositType.SelectedItem.ToString().Contains("Depósito bancario");
                 cmbDepositBank.Enabled = isBank;
             };
 
-            // Transfer group
-            var grpTransfer = new GroupBox { Text = "Transferir a banco", Location = new Point(372, 40), Size = new Size(340, 160), BackColor = Color.White };
-            cmbTransferBank = new ComboBox { Location = new Point(12, 22), Width = 250, DropDownStyle = ComboBoxStyle.DropDownList };
+            // --- Transfer panel (MP blue pastel) ---
+            Panel pnlTransfer = new Panel
+            {
+                Location = new Point(410, 70),
+                Size = new Size(380, 180),
+                BackColor = Color.White
+            };
+            pnlTransfer.Paint += (s, ev) =>
+            {
+                ev.Graphics.FillRectangle(new SolidBrush(Color.FromArgb(66, 165, 245)), 0, 0, 5, pnlTransfer.Height);
+                ev.Graphics.DrawRectangle(new Pen(Color.FromArgb(187, 222, 251)), 0, 0, pnlTransfer.Width - 1, pnlTransfer.Height - 1);
+            };
+            Label lblTrTitle = new Label { Text = "Transferencias", Font = new Font("Segoe UI", 11f, FontStyle.Bold), ForeColor = Color.FromArgb(30, 136, 229), Location = new Point(16, 8), AutoSize = true };
+            Label lblTrBank = new Label { Text = "Banco destino:", Font = new Font("Segoe UI", 8.5f), ForeColor = Color.Gray, Location = new Point(16, 34), AutoSize = true };
+            cmbTransferBank = new ComboBox { Location = new Point(16, 52), Width = 240, DropDownStyle = ComboBoxStyle.DropDownList, Font = new Font("Segoe UI", 9f) };
             cmbTransferBank.Items.AddRange(new object[] { "BBVA", "Santander", "Banorte", "HSBC", "Banamex" });
             cmbTransferBank.SelectedIndex = 0;
-            var lblTrAmount = new Label { Text = "Monto:", Location = new Point(12, 54), AutoSize = true };
-            numTransferAmount = new NumericUpDown { Location = new Point(70, 52), Width = 120, Minimum = 1, Maximum = 100000, Value = 100 };
-            btnTransfer = new Button { Text = "Transferir", Location = new Point(12, 86), Size = new Size(250, 30), BackColor = Color.FromArgb(0, 85, 165), ForeColor = Color.White, FlatStyle = FlatStyle.Flat };
-            // Hook transfer, using numTransferAmount value
+            Label lblTrAmt = new Label { Text = "Monto:", Font = new Font("Segoe UI", 8.5f), ForeColor = Color.Gray, Location = new Point(270, 34), AutoSize = true };
+            numTransferAmount = new NumericUpDown { Location = new Point(270, 52), Width = 96, Minimum = 1, Maximum = 100000, Value = 100, Font = new Font("Segoe UI", 9f) };
+            btnTransfer = new Button { Text = "Transferir", Location = new Point(16, 96), Size = new Size(350, 32), BackColor = Color.FromArgb(66, 165, 245), ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9.5f, FontStyle.Bold), Cursor = Cursors.Hand };
+            btnTransfer.FlatAppearance.BorderSize = 0;
             btnTransfer.Click += (s, e) => { numTransferAmount_ValueChanged(s, e); BtnTransfer_Click(s, e); };
-            grpTransfer.Controls.Add(cmbTransferBank);
-            grpTransfer.Controls.Add(lblTrAmount);
-            grpTransfer.Controls.Add(numTransferAmount);
-            grpTransfer.Controls.Add(btnTransfer);
+            pnlTransfer.Controls.AddRange(new Control[] { lblTrTitle, lblTrBank, cmbTransferBank, lblTrAmt, numTransferAmount, btnTransfer });
 
-            // Withdraw group
-            var grpWithdraw = new GroupBox { Text = "Retirar efectivo", Location = new Point(12, 210), Size = new Size(340, 200), BackColor = Color.White };
-            cmbWithdrawProvider = new ComboBox { Location = new Point(12, 48), Width = 240, DropDownStyle = ComboBoxStyle.DropDownList };
+            // --- Withdraw panel (green pastel) ---
+            Panel pnlWithdraw = new Panel
+            {
+                Location = new Point(14, 264),
+                Size = new Size(380, 180),
+                BackColor = Color.White
+            };
+            pnlWithdraw.Paint += (s, ev) =>
+            {
+                ev.Graphics.FillRectangle(new SolidBrush(Color.FromArgb(102, 187, 106)), 0, 0, 5, pnlWithdraw.Height);
+                ev.Graphics.DrawRectangle(new Pen(Color.FromArgb(200, 230, 201)), 0, 0, pnlWithdraw.Width - 1, pnlWithdraw.Height - 1);
+            };
+            Label lblWdTitle = new Label { Text = "Retiros", Font = new Font("Segoe UI", 11f, FontStyle.Bold), ForeColor = Color.FromArgb(46, 125, 50), Location = new Point(16, 8), AutoSize = true };
+            Label lblWdProv = new Label { Text = "Proveedor:", Font = new Font("Segoe UI", 8.5f), ForeColor = Color.Gray, Location = new Point(16, 34), AutoSize = true };
+            cmbWithdrawProvider = new ComboBox { Location = new Point(16, 52), Width = 240, DropDownStyle = ComboBoxStyle.DropDownList, Font = new Font("Segoe UI", 9f) };
             cmbWithdrawProvider.Items.AddRange(new object[] { "Mercado Pago Express", "7-Eleven", "Soriana", "Chedraui", "Aurrera", "Walmart" });
             cmbWithdrawProvider.SelectedIndex = 0;
-            var lblWAmount = new Label { Text = "Monto:", Location = new Point(12, 88), AutoSize = true };
-            numWithdrawAmount = new NumericUpDown { Location = new Point(70, 86), Width = 120, Minimum = 1, Maximum = 100000, Value = 100 };
-            btnWithdraw = new Button { Text = "Retirar", Location = new Point(210, 82), Size = new Size(120, 30), BackColor = Color.FromArgb(0, 85, 165), ForeColor = Color.White, FlatStyle = FlatStyle.Flat };
+            Label lblWdAmt = new Label { Text = "Monto:", Font = new Font("Segoe UI", 8.5f), ForeColor = Color.Gray, Location = new Point(270, 34), AutoSize = true };
+            numWithdrawAmount = new NumericUpDown { Location = new Point(270, 52), Width = 96, Minimum = 1, Maximum = 100000, Value = 100, Font = new Font("Segoe UI", 9f) };
+            btnWithdraw = new Button { Text = "Retirar", Location = new Point(16, 96), Size = new Size(350, 32), BackColor = Color.FromArgb(102, 187, 106), ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9.5f, FontStyle.Bold), Cursor = Cursors.Hand };
+            btnWithdraw.FlatAppearance.BorderSize = 0;
             btnWithdraw.Click += (s, e) => { numWithdrawAmount_ValueChanged(s, e); BtnWithdraw_Click(s, e); };
-            grpWithdraw.Controls.Add(new Label { Text = "Proveedor:", Location = new Point(12, 28), AutoSize = true });
-            grpWithdraw.Controls.Add(cmbWithdrawProvider);
-            grpWithdraw.Controls.Add(lblWAmount);
-            grpWithdraw.Controls.Add(numWithdrawAmount);
-            grpWithdraw.Controls.Add(btnWithdraw);
+            pnlWithdraw.Controls.AddRange(new Control[] { lblWdTitle, lblWdProv, cmbWithdrawProvider, lblWdAmt, numWithdrawAmount, btnWithdraw });
 
-            // Summary button
-            btnSummary = new Button { Text = "Ver informe de cuenta", Location = new Point(12, 430), Size = new Size(200, 34), BackColor = Color.FromArgb(0, 85, 165), ForeColor = Color.White, FlatStyle = FlatStyle.Flat };
+            // --- History DataGridView (right side, styled) ---
+            Label lblHist = new Label
+            {
+                Text = "📋 Historial reciente",
+                Location = new Point(410, 264),
+                AutoSize = true,
+                Font = new Font("Segoe UI", 10f, FontStyle.Bold),
+                ForeColor = Color.FromArgb(69, 90, 100)
+            };
+            historyGrid = new DataGridView
+            {
+                Location = new Point(410, 288),
+                Size = new Size(380, 156),
+                ReadOnly = true,
+                AllowUserToAddRows = false,
+                AllowUserToDeleteRows = false,
+                RowHeadersVisible = false,
+                BackgroundColor = Color.White,
+                GridColor = Color.FromArgb(224, 224, 224),
+                BorderStyle = BorderStyle.None,
+                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
+                Font = new Font("Segoe UI", 8.5f),
+                CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal
+            };
+            historyGrid.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(66, 165, 245);
+            historyGrid.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
+            historyGrid.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 8.5f, FontStyle.Bold);
+            historyGrid.ColumnHeadersDefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+            historyGrid.EnableHeadersVisualStyles = false;
+            historyGrid.DefaultCellStyle.SelectionBackColor = Color.FromArgb(227, 242, 253);
+            historyGrid.DefaultCellStyle.SelectionForeColor = Color.FromArgb(30, 30, 30);
+            historyGrid.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(248, 250, 252);
+            historyGrid.Columns.Add("Hora", "Hora");
+            historyGrid.Columns.Add("Tipo", "Tipo");
+            historyGrid.Columns.Add("Monto", "Monto");
+            historyGrid.Columns.Add("Detalles", "Detalles");
+            historyGrid.Columns[2].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+
+            // --- Bottom buttons ---
+            btnSummary = new Button
+            {
+                Text = "📊 Informe de cuenta",
+                Location = new Point(14, 460),
+                Size = new Size(220, 40),
+                BackColor = Color.FromArgb(232, 245, 233),
+                ForeColor = Color.FromArgb(27, 94, 32),
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Segoe UI", 10f, FontStyle.Bold),
+                Cursor = Cursors.Hand
+            };
+            btnSummary.FlatAppearance.BorderColor = Color.FromArgb(165, 214, 167);
             btnSummary.Click += BtnSummary_Click;
 
-            btnBackOps = new Button { Text = "Atrás", Location = new Point(232, 430), Size = new Size(100, 34), BackColor = Color.White, ForeColor = Color.FromArgb(0,85,165), FlatStyle = FlatStyle.Flat };
-            btnBackOps.Click += (s,e) => { if (this.Owner!=null) { this.Owner.Show(); } this.Close(); };
+            btnBackOps = new Button
+            {
+                Text = "← Volver",
+                Location = new Point(250, 460),
+                Size = new Size(140, 40),
+                BackColor = Color.Transparent,
+                ForeColor = Color.FromArgb(66, 165, 245),
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Segoe UI", 10f, FontStyle.Bold),
+                Cursor = Cursors.Hand
+            };
+            btnBackOps.FlatAppearance.BorderSize = 0;
+            btnBackOps.Click += (s, e) => { if (this.Owner != null) { this.Owner.Show(); } this.Close(); };
 
-            // History list (ensure initialized)
-            lstAcctHistory = new ListBox { Location = new Point(372, 210), Size = new Size(340, 200), BorderStyle = BorderStyle.FixedSingle };
-            Label lblHist = new Label { Text = "Historial reciente", Location = new Point(372, 188), AutoSize = true, ForeColor = Color.FromArgb(0,85,165) };
-
-            this.Controls.Add(lblAcct);
-            this.Controls.Add(grpDeposit);
-            this.Controls.Add(grpTransfer);
-            this.Controls.Add(grpWithdraw);
+            this.Controls.Add(topBanner);
+            this.Controls.Add(pnlDeposit);
+            this.Controls.Add(pnlTransfer);
+            this.Controls.Add(pnlWithdraw);
+            this.Controls.Add(lblHist);
+            this.Controls.Add(historyGrid);
             this.Controls.Add(btnSummary);
             this.Controls.Add(btnBackOps);
-            this.Controls.Add(lblHist);
-            this.Controls.Add(lstAcctHistory);
 
             UpdateAccountLabel();
         }
@@ -161,7 +260,7 @@ namespace Examen
             a.DepositTotals[key] += amountToAdd;
             UpdateAccountLabel();
             // record history entry
-            lstAcctHistory.Items.Insert(0, $"{DateTime.Now:yyyy-MM-dd HH:mm} - Ingreso {key} ${amountToAdd:0.00}");
+            historyGrid.Rows.Insert(0, DateTime.Now.ToString("HH:mm"), "Ingreso", $"${amountToAdd:0.00}", key);
             MessageBox.Show($"Ingreso realizado.\nCuenta: {a.Owner} - {a.CardNumber}\nTipo: {key}\nMonto ingresado: ${amountToAdd:0.00}\nSaldo actual: ${a.Balance:0.00}", "Ingreso registrado", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
@@ -188,7 +287,7 @@ namespace Examen
             a.TransferCounts[bank]++;
             a.TransferTotals[bank] += amount;
             UpdateAccountLabel();
-            lstAcctHistory.Items.Insert(0, $"{DateTime.Now:yyyy-MM-dd HH:mm} - Transferencia a {bank} ${amount:0.00}");
+            historyGrid.Rows.Insert(0, DateTime.Now.ToString("HH:mm"), "Transferencia", $"${amount:0.00}", bank);
             MessageBox.Show($"Transferencia realizada.\nCuenta origen: {a.Owner} - {a.CardNumber}\nBanco destino: {bank}\nMonto transferido: ${amount:0.00}\nSaldo actual: ${a.Balance:0.00}", "Transferencia", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
@@ -221,7 +320,7 @@ namespace Examen
             a.WithdrawCounts[prov]++;
             a.WithdrawTotals[prov] += amount;
             UpdateAccountLabel();
-            lstAcctHistory.Items.Insert(0, $"{DateTime.Now:yyyy-MM-dd HH:mm} - Retiro {prov} ${amount:0.00} (Com: ${commission:0.00})");
+            historyGrid.Rows.Insert(0, DateTime.Now.ToString("HH:mm"), "Retiro", $"${amount:0.00}", $"{prov} (Com: ${commission:0.00})");
             MessageBox.Show($"Retiro realizado.\nCuenta: {a.Owner} - {a.CardNumber}\nProveedor: {prov}\nMonto retirado: ${amount:0.00}\nComisión: ${commission:0.00}\nSaldo actual: ${a.Balance:0.00}", "Retiro registrado", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
@@ -230,15 +329,14 @@ namespace Examen
             var a = AccountManager.CurrentAccount;
             if (a == null) { MessageBox.Show("Inicie sesión para ver el resumen.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error); return; }
             var sb = new StringBuilder();
-            sb.AppendLine("INFORME DE CUENTA");
+            sb.AppendLine($"  Titular:       {a.Owner}");
+            sb.AppendLine($"  Tarjeta:       {a.CardNumber}");
+            sb.AppendLine($"  Email:         {a.Email}");
+            sb.AppendLine($"  Teléfono:      {a.Phone}");
             sb.AppendLine();
-            sb.AppendLine($"Titular: {a.Owner}");
-            sb.AppendLine($"Tarjeta: {a.CardNumber}");
-            sb.AppendLine($"Email: {a.Email}");
-            sb.AppendLine($"Teléfono: {a.Phone}");
-            sb.AppendLine();
-            sb.AppendLine("TOTALES:");
-            // commissions total
+            sb.AppendLine("══════════════════════════════════════");
+            sb.AppendLine("  TOTALES");
+            sb.AppendLine("══════════════════════════════════════");
             decimal totalCommissions = 0m;
             foreach (var prov in a.WithdrawCounts.Keys)
             {
@@ -252,24 +350,97 @@ namespace Examen
                 }
                 totalCommissions += comm * a.WithdrawCounts[prov];
             }
-            sb.AppendLine($"- Comisiones totales: ${totalCommissions:0.00}");
-            sb.AppendLine($"- Ingresos totales: ${a.TotalDeposited:0.00}");
-            sb.AppendLine($"- Transferencias totales: ${a.TotalTransferred:0.00}");
-            sb.AppendLine($"- Retiros totales: ${a.TotalWithdrawn:0.00}");
-            sb.AppendLine($"- Saldo actual: ${a.Balance:0.00}");
+            sb.AppendLine($"  Comisiones totales:       ${totalCommissions:0.00}");
+            sb.AppendLine($"  Ingresos totales:         ${a.TotalDeposited:0.00}");
+            sb.AppendLine($"  Transferencias totales:   ${a.TotalTransferred:0.00}");
+            sb.AppendLine($"  Retiros totales:          ${a.TotalWithdrawn:0.00}");
+            sb.AppendLine($"  Saldo actual:             ${a.Balance:0.00}");
             sb.AppendLine();
-            sb.AppendLine("DETALLE DE INGRESOS:");
-            foreach (var k in a.DepositCounts.Keys) { decimal val = a.DepositTotals.ContainsKey(k) ? a.DepositTotals[k] : 0m; sb.AppendLine($" - {k}: {a.DepositCounts[k]} operaciones - ${val:0.00}"); }
+            sb.AppendLine("──────────────────────────────────────");
+            sb.AppendLine("  DETALLE DE INGRESOS");
+            sb.AppendLine("──────────────────────────────────────");
+            foreach (var k in a.DepositCounts.Keys) { decimal val = a.DepositTotals.ContainsKey(k) ? a.DepositTotals[k] : 0m; sb.AppendLine($"   • {k}: {a.DepositCounts[k]} ops — ${val:0.00}"); }
             sb.AppendLine();
-            sb.AppendLine("DETALLE DE TRANSFERENCIAS:");
-            foreach (var k in a.TransferCounts.Keys) { decimal val = a.TransferTotals.ContainsKey(k) ? a.TransferTotals[k] : 0m; sb.AppendLine($" - {k}: {a.TransferCounts[k]} operaciones - ${val:0.00}"); }
+            sb.AppendLine("──────────────────────────────────────");
+            sb.AppendLine("  DETALLE DE TRANSFERENCIAS");
+            sb.AppendLine("──────────────────────────────────────");
+            foreach (var k in a.TransferCounts.Keys) { decimal val = a.TransferTotals.ContainsKey(k) ? a.TransferTotals[k] : 0m; sb.AppendLine($"   • {k}: {a.TransferCounts[k]} ops — ${val:0.00}"); }
             sb.AppendLine();
-            sb.AppendLine("DETALLE DE RETIROS:");
-            foreach (var k in a.WithdrawCounts.Keys) { decimal val = a.WithdrawTotals.ContainsKey(k) ? a.WithdrawTotals[k] : 0m; sb.AppendLine($" - {k}: {a.WithdrawCounts[k]} retiros - ${val:0.00}"); }
+            sb.AppendLine("──────────────────────────────────────");
+            sb.AppendLine("  DETALLE DE RETIROS");
+            sb.AppendLine("──────────────────────────────────────");
+            foreach (var k in a.WithdrawCounts.Keys) { decimal val = a.WithdrawTotals.ContainsKey(k) ? a.WithdrawTotals[k] : 0m; sb.AppendLine($"   • {k}: {a.WithdrawCounts[k]} retiros — ${val:0.00}"); }
             sb.AppendLine();
-            sb.AppendLine($"Total cuentas creadas: {AccountManager.Accounts.Count}");
-            sb.AppendLine($"Intentos fallidos de inicio de sesión (global): {AccountManager.TotalFailedLoginAttempts}");
-            MessageBox.Show(sb.ToString(), "Informe de cuenta", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            sb.AppendLine("══════════════════════════════════════");
+            sb.AppendLine($"  Cuentas creadas: {AccountManager.Accounts.Count}");
+            sb.AppendLine($"  Intentos fallidos (global): {AccountManager.TotalFailedLoginAttempts}");
+            ShowStyledReport("Informe de Cuenta", sb.ToString(), Color.FromArgb(66, 165, 245));
+        }
+
+        private void ShowStyledReport(string title, string content, Color accentColor)
+        {
+            using (Form dlg = new Form())
+            {
+                dlg.Text = title;
+                dlg.Size = new Size(520, 480);
+                dlg.FormBorderStyle = FormBorderStyle.FixedDialog;
+                dlg.StartPosition = FormStartPosition.CenterParent;
+                dlg.MaximizeBox = false;
+                dlg.MinimizeBox = false;
+                dlg.BackColor = Color.White;
+                dlg.Font = new Font("Segoe UI", 10f);
+
+                Panel header = new Panel
+                {
+                    Dock = DockStyle.Top,
+                    Height = 50,
+                    BackColor = accentColor
+                };
+                Label lblTitle = new Label
+                {
+                    Text = title,
+                    Font = new Font("Segoe UI", 14f, FontStyle.Bold),
+                    ForeColor = Color.White,
+                    AutoSize = true,
+                    Location = new Point(16, 12),
+                    BackColor = Color.Transparent
+                };
+                header.Controls.Add(lblTitle);
+
+                TextBox txtReport = new TextBox
+                {
+                    Multiline = true,
+                    ReadOnly = true,
+                    ScrollBars = ScrollBars.Vertical,
+                    Location = new Point(12, 62),
+                    Size = new Size(480, 340),
+                    Font = new Font("Consolas", 9.5f),
+                    BackColor = Color.FromArgb(250, 252, 255),
+                    ForeColor = Color.FromArgb(40, 40, 40),
+                    BorderStyle = BorderStyle.FixedSingle,
+                    Text = content
+                };
+
+                Button btnClose = new Button
+                {
+                    Text = "Cerrar",
+                    Size = new Size(120, 36),
+                    Location = new Point(372, 408),
+                    BackColor = accentColor,
+                    ForeColor = Color.White,
+                    FlatStyle = FlatStyle.Flat,
+                    Font = new Font("Segoe UI", 10f, FontStyle.Bold),
+                    Cursor = Cursors.Hand,
+                    DialogResult = DialogResult.OK
+                };
+                btnClose.FlatAppearance.BorderSize = 0;
+
+                dlg.Controls.Add(header);
+                dlg.Controls.Add(txtReport);
+                dlg.Controls.Add(btnClose);
+                dlg.AcceptButton = btnClose;
+                dlg.ShowDialog(this);
+            }
         }
 
         private void numTransferAmount_ValueChanged(object s, EventArgs e)
