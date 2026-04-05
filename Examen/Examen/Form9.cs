@@ -32,61 +32,117 @@ namespace Examen
         private ComboBox cmbDepositBank;
         private Button btnBackOps;
         private DataGridView historyGrid;
+        private ComboBox cmbRechargeCompany;
+        private NumericUpDown numRechargeAmount;
+        private Button btnRecharge;
+        private ComboBox cmbServiceType;
+        private NumericUpDown numServiceAmount;
+        private Button btnServicePayment;
+        private ComboBox cmbTagProvider;
+        private NumericUpDown numTagAmount;
+        private Button btnTagRecharge;
 
         private void InitializeAccountOperations()
         {
             this.Text = "Mercado Pago - Operaciones";
-            this.Size = new Size(820, 600);
-            this.BackColor = Color.FromArgb(236, 244, 255); // pastel MP light blue
+            this.Size = new Size(860, 640);
+            this.BackColor = Color.FromArgb(245, 248, 255);
             this.Font = new Font("Segoe UI", 9.5f);
             this.FormBorderStyle = FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
             this.StartPosition = FormStartPosition.CenterScreen;
 
-            // Top banner
+            // ── Top banner (MP blue gradient) ──
             Panel topBanner = new Panel
             {
-                Size = new Size(820, 56),
+                Size = new Size(860, 60),
                 Location = new Point(0, 0),
-                BackColor = Color.FromArgb(66, 165, 245),
-                Dock = DockStyle.Top
+                Dock = DockStyle.Top,
+                BackColor = Color.FromArgb(66, 165, 245)
+            };
+            topBanner.Paint += (s, ev) =>
+            {
+                using (var brush = new System.Drawing.Drawing2D.LinearGradientBrush(
+                    topBanner.ClientRectangle,
+                    Color.FromArgb(21, 101, 192),
+                    Color.FromArgb(66, 165, 245),
+                    System.Drawing.Drawing2D.LinearGradientMode.Horizontal))
+                {
+                    ev.Graphics.FillRectangle(brush, topBanner.ClientRectangle);
+                }
             };
             lblAcct = new Label
             {
                 Text = "Cuenta: (sin sesión)",
-                Location = new Point(18, 16),
+                Location = new Point(18, 8),
                 AutoSize = true,
                 ForeColor = Color.White,
-                Font = new Font("Segoe UI", 12f, FontStyle.Bold),
+                Font = new Font("Segoe UI", 13f, FontStyle.Bold),
                 BackColor = Color.Transparent
             };
-            topBanner.Controls.Add(lblAcct);
-
-            // --- Deposit panel (ML yellow pastel) ---
-            Panel pnlDeposit = new Panel
+            Label lblAcctSub = new Label
             {
-                Location = new Point(14, 70),
-                Size = new Size(380, 180),
-                BackColor = Color.White
+                Text = "💳 Mercado Pago - Operaciones",
+                Location = new Point(18, 34),
+                AutoSize = true,
+                ForeColor = Color.FromArgb(200, 227, 255),
+                Font = new Font("Segoe UI", 9f),
+                BackColor = Color.Transparent
             };
+            btnBackOps = new Button
+            {
+                Text = "← Volver",
+                Location = new Point(720, 14),
+                Size = new Size(110, 32),
+                BackColor = Color.Transparent,
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Segoe UI", 9.5f, FontStyle.Bold),
+                Cursor = Cursors.Hand
+            };
+            btnBackOps.FlatAppearance.BorderColor = Color.FromArgb(100, 180, 255);
+            btnBackOps.Click += (s, e) => { if (this.Owner != null) { this.Owner.Show(); } this.Close(); };
+            topBanner.Controls.Add(lblAcct);
+            topBanner.Controls.Add(lblAcctSub);
+            topBanner.Controls.Add(btnBackOps);
+
+            // ── TabControl ──
+            TabControl tabs = new TabControl
+            {
+                Location = new Point(10, 66),
+                Size = new Size(824, 530),
+                Font = new Font("Segoe UI", 9.5f, FontStyle.Bold)
+            };
+
+            // ═══════════════════════════════════════
+            //  TAB 1: Operaciones Bancarias
+            // ═══════════════════════════════════════
+            TabPage tabBanking = new TabPage("🏦 Operaciones Bancarias")
+            {
+                BackColor = Color.FromArgb(250, 252, 255),
+                Padding = new Padding(8)
+            };
+
+            // ── Deposit panel ──
+            Panel pnlDeposit = new Panel { Location = new Point(10, 10), Size = new Size(390, 220), BackColor = Color.White };
             pnlDeposit.Paint += (s, ev) =>
             {
-                ev.Graphics.FillRectangle(new SolidBrush(Color.FromArgb(255, 202, 40)), 0, 0, 5, pnlDeposit.Height);
+                ev.Graphics.FillRectangle(new SolidBrush(Color.FromArgb(255, 202, 40)), 0, 0, pnlDeposit.Width, 5);
                 ev.Graphics.DrawRectangle(new Pen(Color.FromArgb(255, 236, 179)), 0, 0, pnlDeposit.Width - 1, pnlDeposit.Height - 1);
             };
-            Label lblDepTitle = new Label { Text = "Ingresos", Font = new Font("Segoe UI", 11f, FontStyle.Bold), ForeColor = Color.FromArgb(245, 166, 35), Location = new Point(16, 8), AutoSize = true };
-            Label lblDepType = new Label { Text = "Tipo:", Font = new Font("Segoe UI", 8.5f), ForeColor = Color.Gray, Location = new Point(16, 34), AutoSize = true };
-            cmbDepositType = new ComboBox { Location = new Point(16, 52), Width = 240, DropDownStyle = ComboBoxStyle.DropDownList, Font = new Font("Segoe UI", 9f) };
-            cmbDepositType.Items.AddRange(new object[] { "Oxxo/7Eleven", "Depósito bancario", "Transferencia", "Dinero desde el extranjero (USD)", "Dinero desde el extranjero (EUR)" });
+            Label lblDepTitle = new Label { Text = "💰 Ingresos", Font = new Font("Segoe UI", 12f, FontStyle.Bold), ForeColor = Color.FromArgb(245, 166, 35), Location = new Point(16, 14), AutoSize = true };
+            Label lblDepType = new Label { Text = "Tipo:", Font = new Font("Segoe UI", 9f), ForeColor = Color.Gray, Location = new Point(16, 48), AutoSize = true };
+            cmbDepositType = new ComboBox { Location = new Point(16, 68), Width = 250, DropDownStyle = ComboBoxStyle.DropDownList, Font = new Font("Segoe UI", 9.5f) };
+            cmbDepositType.Items.AddRange(new object[] { "Oxxo", "Seven Eleven", "Depósito bancario", "Transferencia", "Dinero desde el extranjero (USD)", "Dinero desde el extranjero (EUR)" });
             cmbDepositType.SelectedIndex = 0;
-            Label lblDepAmt = new Label { Text = "Monto:", Font = new Font("Segoe UI", 8.5f), ForeColor = Color.Gray, Location = new Point(270, 34), AutoSize = true };
-            numDepositAmount = new NumericUpDown { Location = new Point(270, 52), Width = 96, Minimum = 1, Maximum = 100000, Value = 100, Font = new Font("Segoe UI", 9f) };
-            Label lblBank = new Label { Text = "Banco:", Font = new Font("Segoe UI", 8.5f), ForeColor = Color.Gray, Location = new Point(16, 82), AutoSize = true };
-            cmbDepositBank = new ComboBox { Location = new Point(16, 100), Width = 240, DropDownStyle = ComboBoxStyle.DropDownList, Font = new Font("Segoe UI", 9f) };
+            Label lblDepAmt = new Label { Text = "Monto:", Font = new Font("Segoe UI", 9f), ForeColor = Color.Gray, Location = new Point(280, 48), AutoSize = true };
+            numDepositAmount = new NumericUpDown { Location = new Point(280, 68), Width = 96, Minimum = 1, Maximum = 100000, Value = 100, Font = new Font("Segoe UI", 9.5f) };
+            Label lblBank = new Label { Text = "Banco:", Font = new Font("Segoe UI", 9f), ForeColor = Color.Gray, Location = new Point(16, 102), AutoSize = true };
+            cmbDepositBank = new ComboBox { Location = new Point(16, 122), Width = 250, DropDownStyle = ComboBoxStyle.DropDownList, Font = new Font("Segoe UI", 9.5f) };
             var banks = new object[] { "BBVA", "Santander", "Banorte", "HSBC", "Banamex" };
             cmbDepositBank.Items.AddRange(banks);
             if (cmbDepositBank.Items.Count > 0) cmbDepositBank.SelectedIndex = 0;
-            btnDeposit = new Button { Text = "Ingresar", Location = new Point(16, 136), Size = new Size(350, 32), BackColor = Color.FromArgb(255, 202, 40), ForeColor = Color.FromArgb(50, 40, 10), FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9.5f, FontStyle.Bold), Cursor = Cursors.Hand };
+            btnDeposit = new Button { Text = "Ingresar", Location = new Point(16, 168), Size = new Size(360, 36), BackColor = Color.FromArgb(255, 202, 40), ForeColor = Color.FromArgb(50, 40, 10), FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 10f, FontStyle.Bold), Cursor = Cursors.Hand };
             btnDeposit.FlatAppearance.BorderSize = 0;
             btnDeposit.Click += BtnDeposit_Click;
             pnlDeposit.Controls.AddRange(new Control[] { lblDepTitle, lblDepType, cmbDepositType, lblDepAmt, numDepositAmount, lblBank, cmbDepositBank, btnDeposit });
@@ -97,67 +153,155 @@ namespace Examen
                 cmbDepositBank.Enabled = isBank;
             };
 
-            // --- Transfer panel (MP blue pastel) ---
-            Panel pnlTransfer = new Panel
-            {
-                Location = new Point(410, 70),
-                Size = new Size(380, 180),
-                BackColor = Color.White
-            };
+            // ── Transfer panel ──
+            Panel pnlTransfer = new Panel { Location = new Point(414, 10), Size = new Size(390, 220), BackColor = Color.White };
             pnlTransfer.Paint += (s, ev) =>
             {
-                ev.Graphics.FillRectangle(new SolidBrush(Color.FromArgb(66, 165, 245)), 0, 0, 5, pnlTransfer.Height);
+                ev.Graphics.FillRectangle(new SolidBrush(Color.FromArgb(66, 165, 245)), 0, 0, pnlTransfer.Width, 5);
                 ev.Graphics.DrawRectangle(new Pen(Color.FromArgb(187, 222, 251)), 0, 0, pnlTransfer.Width - 1, pnlTransfer.Height - 1);
             };
-            Label lblTrTitle = new Label { Text = "Transferencias", Font = new Font("Segoe UI", 11f, FontStyle.Bold), ForeColor = Color.FromArgb(30, 136, 229), Location = new Point(16, 8), AutoSize = true };
-            Label lblTrBank = new Label { Text = "Banco destino:", Font = new Font("Segoe UI", 8.5f), ForeColor = Color.Gray, Location = new Point(16, 34), AutoSize = true };
-            cmbTransferBank = new ComboBox { Location = new Point(16, 52), Width = 240, DropDownStyle = ComboBoxStyle.DropDownList, Font = new Font("Segoe UI", 9f) };
+            Label lblTrTitle = new Label { Text = "🔄 Transferencias", Font = new Font("Segoe UI", 12f, FontStyle.Bold), ForeColor = Color.FromArgb(30, 136, 229), Location = new Point(16, 14), AutoSize = true };
+            Label lblTrBank = new Label { Text = "Banco destino:", Font = new Font("Segoe UI", 9f), ForeColor = Color.Gray, Location = new Point(16, 48), AutoSize = true };
+            cmbTransferBank = new ComboBox { Location = new Point(16, 68), Width = 250, DropDownStyle = ComboBoxStyle.DropDownList, Font = new Font("Segoe UI", 9.5f) };
             cmbTransferBank.Items.AddRange(new object[] { "BBVA", "Santander", "Banorte", "HSBC", "Banamex" });
             cmbTransferBank.SelectedIndex = 0;
-            Label lblTrAmt = new Label { Text = "Monto:", Font = new Font("Segoe UI", 8.5f), ForeColor = Color.Gray, Location = new Point(270, 34), AutoSize = true };
-            numTransferAmount = new NumericUpDown { Location = new Point(270, 52), Width = 96, Minimum = 1, Maximum = 100000, Value = 100, Font = new Font("Segoe UI", 9f) };
-            btnTransfer = new Button { Text = "Transferir", Location = new Point(16, 96), Size = new Size(350, 32), BackColor = Color.FromArgb(66, 165, 245), ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9.5f, FontStyle.Bold), Cursor = Cursors.Hand };
+            Label lblTrAmt = new Label { Text = "Monto:", Font = new Font("Segoe UI", 9f), ForeColor = Color.Gray, Location = new Point(280, 48), AutoSize = true };
+            numTransferAmount = new NumericUpDown { Location = new Point(280, 68), Width = 96, Minimum = 1, Maximum = 100000, Value = 100, Font = new Font("Segoe UI", 9.5f) };
+            btnTransfer = new Button { Text = "Transferir", Location = new Point(16, 120), Size = new Size(360, 36), BackColor = Color.FromArgb(66, 165, 245), ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 10f, FontStyle.Bold), Cursor = Cursors.Hand };
             btnTransfer.FlatAppearance.BorderSize = 0;
             btnTransfer.Click += (s, e) => { numTransferAmount_ValueChanged(s, e); BtnTransfer_Click(s, e); };
             pnlTransfer.Controls.AddRange(new Control[] { lblTrTitle, lblTrBank, cmbTransferBank, lblTrAmt, numTransferAmount, btnTransfer });
 
-            // --- Withdraw panel (green pastel) ---
-            Panel pnlWithdraw = new Panel
-            {
-                Location = new Point(14, 264),
-                Size = new Size(380, 180),
-                BackColor = Color.White
-            };
+            // ── Withdraw panel ──
+            Panel pnlWithdraw = new Panel { Location = new Point(10, 244), Size = new Size(390, 220), BackColor = Color.White };
             pnlWithdraw.Paint += (s, ev) =>
             {
-                ev.Graphics.FillRectangle(new SolidBrush(Color.FromArgb(102, 187, 106)), 0, 0, 5, pnlWithdraw.Height);
+                ev.Graphics.FillRectangle(new SolidBrush(Color.FromArgb(102, 187, 106)), 0, 0, pnlWithdraw.Width, 5);
                 ev.Graphics.DrawRectangle(new Pen(Color.FromArgb(200, 230, 201)), 0, 0, pnlWithdraw.Width - 1, pnlWithdraw.Height - 1);
             };
-            Label lblWdTitle = new Label { Text = "Retiros", Font = new Font("Segoe UI", 11f, FontStyle.Bold), ForeColor = Color.FromArgb(46, 125, 50), Location = new Point(16, 8), AutoSize = true };
-            Label lblWdProv = new Label { Text = "Proveedor:", Font = new Font("Segoe UI", 8.5f), ForeColor = Color.Gray, Location = new Point(16, 34), AutoSize = true };
-            cmbWithdrawProvider = new ComboBox { Location = new Point(16, 52), Width = 240, DropDownStyle = ComboBoxStyle.DropDownList, Font = new Font("Segoe UI", 9f) };
+            Label lblWdTitle = new Label { Text = "💸 Retiros", Font = new Font("Segoe UI", 12f, FontStyle.Bold), ForeColor = Color.FromArgb(46, 125, 50), Location = new Point(16, 14), AutoSize = true };
+            Label lblWdProv = new Label { Text = "Proveedor:", Font = new Font("Segoe UI", 9f), ForeColor = Color.Gray, Location = new Point(16, 48), AutoSize = true };
+            cmbWithdrawProvider = new ComboBox { Location = new Point(16, 68), Width = 250, DropDownStyle = ComboBoxStyle.DropDownList, Font = new Font("Segoe UI", 9.5f) };
             cmbWithdrawProvider.Items.AddRange(new object[] { "Mercado Pago Express", "7-Eleven", "Soriana", "Chedraui", "Aurrera", "Walmart" });
             cmbWithdrawProvider.SelectedIndex = 0;
-            Label lblWdAmt = new Label { Text = "Monto:", Font = new Font("Segoe UI", 8.5f), ForeColor = Color.Gray, Location = new Point(270, 34), AutoSize = true };
-            numWithdrawAmount = new NumericUpDown { Location = new Point(270, 52), Width = 96, Minimum = 1, Maximum = 100000, Value = 100, Font = new Font("Segoe UI", 9f) };
-            btnWithdraw = new Button { Text = "Retirar", Location = new Point(16, 96), Size = new Size(350, 32), BackColor = Color.FromArgb(102, 187, 106), ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9.5f, FontStyle.Bold), Cursor = Cursors.Hand };
+            Label lblWdAmt = new Label { Text = "Monto:", Font = new Font("Segoe UI", 9f), ForeColor = Color.Gray, Location = new Point(280, 48), AutoSize = true };
+            numWithdrawAmount = new NumericUpDown { Location = new Point(280, 68), Width = 96, Minimum = 1, Maximum = 100000, Value = 100, Font = new Font("Segoe UI", 9.5f) };
+            btnWithdraw = new Button { Text = "Retirar", Location = new Point(16, 120), Size = new Size(360, 36), BackColor = Color.FromArgb(102, 187, 106), ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 10f, FontStyle.Bold), Cursor = Cursors.Hand };
             btnWithdraw.FlatAppearance.BorderSize = 0;
             btnWithdraw.Click += (s, e) => { numWithdrawAmount_ValueChanged(s, e); BtnWithdraw_Click(s, e); };
             pnlWithdraw.Controls.AddRange(new Control[] { lblWdTitle, lblWdProv, cmbWithdrawProvider, lblWdAmt, numWithdrawAmount, btnWithdraw });
 
-            // --- History DataGridView (right side, styled) ---
+            // Summary button in banking tab
+            btnSummary = new Button
+            {
+                Text = "📊 Informe de cuenta",
+                Location = new Point(414, 244),
+                Size = new Size(390, 46),
+                BackColor = Color.FromArgb(232, 245, 233),
+                ForeColor = Color.FromArgb(27, 94, 32),
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Segoe UI", 11f, FontStyle.Bold),
+                Cursor = Cursors.Hand
+            };
+            btnSummary.FlatAppearance.BorderColor = Color.FromArgb(165, 214, 167);
+            btnSummary.Click += BtnSummary_Click;
+
+            tabBanking.Controls.Add(pnlDeposit);
+            tabBanking.Controls.Add(pnlTransfer);
+            tabBanking.Controls.Add(pnlWithdraw);
+            tabBanking.Controls.Add(btnSummary);
+
+            // ═══════════════════════════════════════
+            //  TAB 2: Servicios y Recargas
+            // ═══════════════════════════════════════
+            TabPage tabServices = new TabPage("📱 Servicios y Recargas")
+            {
+                BackColor = Color.FromArgb(250, 252, 255),
+                Padding = new Padding(8)
+            };
+
+            // ── Recarga Celular panel ──
+            Panel pnlRecharge = new Panel { Location = new Point(10, 10), Size = new Size(390, 220), BackColor = Color.White };
+            pnlRecharge.Paint += (s, ev) =>
+            {
+                ev.Graphics.FillRectangle(new SolidBrush(Color.FromArgb(186, 104, 200)), 0, 0, pnlRecharge.Width, 5);
+                ev.Graphics.DrawRectangle(new Pen(Color.FromArgb(225, 190, 231)), 0, 0, pnlRecharge.Width - 1, pnlRecharge.Height - 1);
+            };
+            Label lblRchTitle = new Label { Text = "📱 Recarga Celular", Font = new Font("Segoe UI", 12f, FontStyle.Bold), ForeColor = Color.FromArgb(123, 31, 162), Location = new Point(16, 14), AutoSize = true };
+            Label lblRchComp = new Label { Text = "Compañía:", Font = new Font("Segoe UI", 9f), ForeColor = Color.Gray, Location = new Point(16, 48), AutoSize = true };
+            cmbRechargeCompany = new ComboBox { Location = new Point(16, 68), Width = 250, DropDownStyle = ComboBoxStyle.DropDownList, Font = new Font("Segoe UI", 9.5f) };
+            cmbRechargeCompany.Items.AddRange(new object[] { "AT&T", "Unefón", "Telcel", "Movistar", "Bait" });
+            cmbRechargeCompany.SelectedIndex = 0;
+            Label lblRchAmt = new Label { Text = "Monto:", Font = new Font("Segoe UI", 9f), ForeColor = Color.Gray, Location = new Point(280, 48), AutoSize = true };
+            numRechargeAmount = new NumericUpDown { Location = new Point(280, 68), Width = 96, Minimum = 10, Maximum = 5000, Value = 100, Font = new Font("Segoe UI", 9.5f) };
+            btnRecharge = new Button { Text = "Recargar", Location = new Point(16, 120), Size = new Size(360, 36), BackColor = Color.FromArgb(186, 104, 200), ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 10f, FontStyle.Bold), Cursor = Cursors.Hand };
+            btnRecharge.FlatAppearance.BorderSize = 0;
+            btnRecharge.Click += BtnRecharge_Click;
+            pnlRecharge.Controls.AddRange(new Control[] { lblRchTitle, lblRchComp, cmbRechargeCompany, lblRchAmt, numRechargeAmount, btnRecharge });
+
+            // ── Pago de Servicios panel ──
+            Panel pnlService = new Panel { Location = new Point(414, 10), Size = new Size(390, 220), BackColor = Color.White };
+            pnlService.Paint += (s, ev) =>
+            {
+                ev.Graphics.FillRectangle(new SolidBrush(Color.FromArgb(0, 150, 136)), 0, 0, pnlService.Width, 5);
+                ev.Graphics.DrawRectangle(new Pen(Color.FromArgb(178, 223, 219)), 0, 0, pnlService.Width - 1, pnlService.Height - 1);
+            };
+            Label lblSvcTitle = new Label { Text = "🏠 Pago de Servicios", Font = new Font("Segoe UI", 12f, FontStyle.Bold), ForeColor = Color.FromArgb(0, 105, 92), Location = new Point(16, 14), AutoSize = true };
+            Label lblSvcType = new Label { Text = "Servicio:", Font = new Font("Segoe UI", 9f), ForeColor = Color.Gray, Location = new Point(16, 48), AutoSize = true };
+            cmbServiceType = new ComboBox { Location = new Point(16, 68), Width = 250, DropDownStyle = ComboBoxStyle.DropDownList, Font = new Font("Segoe UI", 9.5f) };
+            cmbServiceType.Items.AddRange(new object[] { "Otros servicios", "Internet", "Agua", "Luz" });
+            cmbServiceType.SelectedIndex = 0;
+            Label lblSvcAmt = new Label { Text = "Monto:", Font = new Font("Segoe UI", 9f), ForeColor = Color.Gray, Location = new Point(280, 48), AutoSize = true };
+            numServiceAmount = new NumericUpDown { Location = new Point(280, 68), Width = 96, Minimum = 1, Maximum = 50000, Value = 200, Font = new Font("Segoe UI", 9.5f) };
+            btnServicePayment = new Button { Text = "Pagar servicio", Location = new Point(16, 120), Size = new Size(360, 36), BackColor = Color.FromArgb(0, 150, 136), ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 10f, FontStyle.Bold), Cursor = Cursors.Hand };
+            btnServicePayment.FlatAppearance.BorderSize = 0;
+            btnServicePayment.Click += BtnServicePayment_Click;
+            pnlService.Controls.AddRange(new Control[] { lblSvcTitle, lblSvcType, cmbServiceType, lblSvcAmt, numServiceAmount, btnServicePayment });
+
+            // ── Recarga de Tag panel ──
+            Panel pnlTag = new Panel { Location = new Point(10, 244), Size = new Size(390, 220), BackColor = Color.White };
+            pnlTag.Paint += (s, ev) =>
+            {
+                ev.Graphics.FillRectangle(new SolidBrush(Color.FromArgb(255, 152, 0)), 0, 0, pnlTag.Width, 5);
+                ev.Graphics.DrawRectangle(new Pen(Color.FromArgb(255, 224, 178)), 0, 0, pnlTag.Width - 1, pnlTag.Height - 1);
+            };
+            Label lblTagTitle = new Label { Text = "🏷 Recarga de Tag", Font = new Font("Segoe UI", 12f, FontStyle.Bold), ForeColor = Color.FromArgb(230, 126, 34), Location = new Point(16, 14), AutoSize = true };
+            Label lblTagProv = new Label { Text = "Proveedor:", Font = new Font("Segoe UI", 9f), ForeColor = Color.Gray, Location = new Point(16, 48), AutoSize = true };
+            cmbTagProvider = new ComboBox { Location = new Point(16, 68), Width = 250, DropDownStyle = ComboBoxStyle.DropDownList, Font = new Font("Segoe UI", 9.5f) };
+            cmbTagProvider.Items.AddRange(new object[] { "Pase", "Televia" });
+            cmbTagProvider.SelectedIndex = 0;
+            Label lblTagAmt = new Label { Text = "Monto:", Font = new Font("Segoe UI", 9f), ForeColor = Color.Gray, Location = new Point(280, 48), AutoSize = true };
+            numTagAmount = new NumericUpDown { Location = new Point(280, 68), Width = 96, Minimum = 50, Maximum = 10000, Value = 200, Font = new Font("Segoe UI", 9.5f) };
+            btnTagRecharge = new Button { Text = "Recargar Tag", Location = new Point(16, 120), Size = new Size(360, 36), BackColor = Color.FromArgb(255, 152, 0), ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 10f, FontStyle.Bold), Cursor = Cursors.Hand };
+            btnTagRecharge.FlatAppearance.BorderSize = 0;
+            btnTagRecharge.Click += BtnTagRecharge_Click;
+            pnlTag.Controls.AddRange(new Control[] { lblTagTitle, lblTagProv, cmbTagProvider, lblTagAmt, numTagAmount, btnTagRecharge });
+
+            tabServices.Controls.Add(pnlRecharge);
+            tabServices.Controls.Add(pnlService);
+            tabServices.Controls.Add(pnlTag);
+
+            // ═══════════════════════════════════════
+            //  TAB 3: Historial
+            // ═══════════════════════════════════════
+            TabPage tabHistory = new TabPage("📋 Historial")
+            {
+                BackColor = Color.FromArgb(250, 252, 255),
+                Padding = new Padding(8)
+            };
+
             Label lblHist = new Label
             {
-                Text = "📋 Historial reciente",
-                Location = new Point(410, 264),
+                Text = "📋 Historial de operaciones recientes",
+                Location = new Point(10, 10),
                 AutoSize = true,
-                Font = new Font("Segoe UI", 10f, FontStyle.Bold),
+                Font = new Font("Segoe UI", 11f, FontStyle.Bold),
                 ForeColor = Color.FromArgb(69, 90, 100)
             };
             historyGrid = new DataGridView
             {
-                Location = new Point(410, 288),
-                Size = new Size(380, 156),
+                Location = new Point(10, 40),
+                Size = new Size(790, 440),
                 ReadOnly = true,
                 AllowUserToAddRows = false,
                 AllowUserToDeleteRows = false,
@@ -166,12 +310,12 @@ namespace Examen
                 GridColor = Color.FromArgb(224, 224, 224),
                 BorderStyle = BorderStyle.None,
                 AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
-                Font = new Font("Segoe UI", 8.5f),
+                Font = new Font("Segoe UI", 9f),
                 CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal
             };
             historyGrid.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(66, 165, 245);
             historyGrid.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
-            historyGrid.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 8.5f, FontStyle.Bold);
+            historyGrid.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 9f, FontStyle.Bold);
             historyGrid.ColumnHeadersDefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
             historyGrid.EnableHeadersVisualStyles = false;
             historyGrid.DefaultCellStyle.SelectionBackColor = Color.FromArgb(227, 242, 253);
@@ -183,43 +327,15 @@ namespace Examen
             historyGrid.Columns.Add("Detalles", "Detalles");
             historyGrid.Columns[2].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
 
-            // --- Bottom buttons ---
-            btnSummary = new Button
-            {
-                Text = "📊 Informe de cuenta",
-                Location = new Point(14, 460),
-                Size = new Size(220, 40),
-                BackColor = Color.FromArgb(232, 245, 233),
-                ForeColor = Color.FromArgb(27, 94, 32),
-                FlatStyle = FlatStyle.Flat,
-                Font = new Font("Segoe UI", 10f, FontStyle.Bold),
-                Cursor = Cursors.Hand
-            };
-            btnSummary.FlatAppearance.BorderColor = Color.FromArgb(165, 214, 167);
-            btnSummary.Click += BtnSummary_Click;
+            tabHistory.Controls.Add(lblHist);
+            tabHistory.Controls.Add(historyGrid);
 
-            btnBackOps = new Button
-            {
-                Text = "← Volver",
-                Location = new Point(250, 460),
-                Size = new Size(140, 40),
-                BackColor = Color.Transparent,
-                ForeColor = Color.FromArgb(66, 165, 245),
-                FlatStyle = FlatStyle.Flat,
-                Font = new Font("Segoe UI", 10f, FontStyle.Bold),
-                Cursor = Cursors.Hand
-            };
-            btnBackOps.FlatAppearance.BorderSize = 0;
-            btnBackOps.Click += (s, e) => { if (this.Owner != null) { this.Owner.Show(); } this.Close(); };
+            tabs.TabPages.Add(tabBanking);
+            tabs.TabPages.Add(tabServices);
+            tabs.TabPages.Add(tabHistory);
 
             this.Controls.Add(topBanner);
-            this.Controls.Add(pnlDeposit);
-            this.Controls.Add(pnlTransfer);
-            this.Controls.Add(pnlWithdraw);
-            this.Controls.Add(lblHist);
-            this.Controls.Add(historyGrid);
-            this.Controls.Add(btnSummary);
-            this.Controls.Add(btnBackOps);
+            this.Controls.Add(tabs);
 
             UpdateAccountLabel();
         }
@@ -253,7 +369,6 @@ namespace Examen
                 bankName = cmbDepositBank.SelectedItem.ToString();
             a.Balance += amountToAdd;
             string key = type;
-            if (type.Contains("Depósito bancario") && !string.IsNullOrEmpty(bankName)) key = $"Depósito bancario - {bankName}";
             if (!a.DepositCounts.ContainsKey(key)) a.DepositCounts[key] = 0;
             if (!a.DepositTotals.ContainsKey(key)) a.DepositTotals[key] = 0m;
             a.DepositCounts[key]++;
@@ -354,12 +469,31 @@ namespace Examen
             sb.AppendLine($"  Ingresos totales:         ${a.TotalDeposited:0.00}");
             sb.AppendLine($"  Transferencias totales:   ${a.TotalTransferred:0.00}");
             sb.AppendLine($"  Retiros totales:          ${a.TotalWithdrawn:0.00}");
+            sb.AppendLine($"  Recargas celular totales: ${a.TotalRecharged:0.00}");
+            sb.AppendLine($"  Pagos servicios totales:  ${a.TotalServicesPaid:0.00}");
+            sb.AppendLine($"  Recargas Tag totales:     ${a.TotalTagRecharged:0.00}");
             sb.AppendLine($"  Saldo actual:             ${a.Balance:0.00}");
             sb.AppendLine();
             sb.AppendLine("──────────────────────────────────────");
             sb.AppendLine("  DETALLE DE INGRESOS");
             sb.AppendLine("──────────────────────────────────────");
-            foreach (var k in a.DepositCounts.Keys) { decimal val = a.DepositTotals.ContainsKey(k) ? a.DepositTotals[k] : 0m; sb.AppendLine($"   • {k}: {a.DepositCounts[k]} ops — ${val:0.00}"); }
+            int combinedBancTransOps = 0;
+            decimal combinedBancTransVal = 0m;
+            foreach (var k in a.DepositCounts.Keys)
+            {
+                decimal val = a.DepositTotals.ContainsKey(k) ? a.DepositTotals[k] : 0m;
+                if (k.StartsWith("Depósito bancario") || k == "Transferencia")
+                {
+                    combinedBancTransOps += a.DepositCounts[k];
+                    combinedBancTransVal += val;
+                }
+                else
+                {
+                    sb.AppendLine($"   • {k}: {a.DepositCounts[k]} ops — ${val:0.00}");
+                }
+            }
+            if (combinedBancTransOps > 0)
+                sb.AppendLine($"   • Depósitos bancarios y Transferencias: {combinedBancTransOps} ops — ${combinedBancTransVal:0.00}");
             sb.AppendLine();
             sb.AppendLine("──────────────────────────────────────");
             sb.AppendLine("  DETALLE DE TRANSFERENCIAS");
@@ -370,6 +504,21 @@ namespace Examen
             sb.AppendLine("  DETALLE DE RETIROS");
             sb.AppendLine("──────────────────────────────────────");
             foreach (var k in a.WithdrawCounts.Keys) { decimal val = a.WithdrawTotals.ContainsKey(k) ? a.WithdrawTotals[k] : 0m; sb.AppendLine($"   • {k}: {a.WithdrawCounts[k]} retiros — ${val:0.00}"); }
+            sb.AppendLine();
+            sb.AppendLine("──────────────────────────────────────");
+            sb.AppendLine("  DETALLE DE RECARGAS CELULAR");
+            sb.AppendLine("──────────────────────────────────────");
+            foreach (var k in a.RechargeCounts.Keys) { decimal val = a.RechargeTotals.ContainsKey(k) ? a.RechargeTotals[k] : 0m; sb.AppendLine($"   • {k}: {a.RechargeCounts[k]} recargas — ${val:0.00}"); }
+            sb.AppendLine();
+            sb.AppendLine("──────────────────────────────────────");
+            sb.AppendLine("  DETALLE DE PAGOS DE SERVICIOS");
+            sb.AppendLine("──────────────────────────────────────");
+            foreach (var k in a.ServicePaymentCounts.Keys) { decimal val = a.ServicePaymentTotals.ContainsKey(k) ? a.ServicePaymentTotals[k] : 0m; sb.AppendLine($"   • {k}: {a.ServicePaymentCounts[k]} pagos — ${val:0.00}"); }
+            sb.AppendLine();
+            sb.AppendLine("──────────────────────────────────────");
+            sb.AppendLine("  DETALLE DE RECARGAS TAG");
+            sb.AppendLine("──────────────────────────────────────");
+            foreach (var k in a.TagRechargeCounts.Keys) { decimal val = a.TagRechargeTotals.ContainsKey(k) ? a.TagRechargeTotals[k] : 0m; sb.AppendLine($"   • {k}: {a.TagRechargeCounts[k]} recargas — ${val:0.00}"); }
             sb.AppendLine();
             sb.AppendLine("══════════════════════════════════════");
             sb.AppendLine($"  Cuentas creadas: {AccountManager.Accounts.Count}");
@@ -441,6 +590,72 @@ namespace Examen
                 dlg.AcceptButton = btnClose;
                 dlg.ShowDialog(this);
             }
+        }
+
+        private void BtnRecharge_Click(object sender, EventArgs e)
+        {
+            var a = AccountManager.CurrentAccount;
+            if (a == null)
+            {
+                MessageBox.Show("Inicie sesión en una cuenta primero.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+            string company = cmbRechargeCompany.SelectedItem.ToString();
+            decimal amount = numRechargeAmount.Value;
+            if (amount <= 0) { MessageBox.Show("Ingrese un monto válido.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error); return; }
+            if (a.Balance < amount) { MessageBox.Show("Saldo insuficiente.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error); return; }
+            a.Balance -= amount;
+            if (!a.RechargeCounts.ContainsKey(company)) a.RechargeCounts[company] = 0;
+            if (!a.RechargeTotals.ContainsKey(company)) a.RechargeTotals[company] = 0m;
+            a.RechargeCounts[company]++;
+            a.RechargeTotals[company] += amount;
+            UpdateAccountLabel();
+            historyGrid.Rows.Insert(0, DateTime.Now.ToString("HH:mm"), "Recarga Cel", $"${amount:0.00}", company);
+            MessageBox.Show($"Recarga realizada.\nCompañía: {company}\nMonto: ${amount:0.00}\nSaldo actual: ${a.Balance:0.00}", "Recarga Celular", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void BtnServicePayment_Click(object sender, EventArgs e)
+        {
+            var a = AccountManager.CurrentAccount;
+            if (a == null)
+            {
+                MessageBox.Show("Inicie sesión en una cuenta primero.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+            string service = cmbServiceType.SelectedItem.ToString();
+            decimal amount = numServiceAmount.Value;
+            if (amount <= 0) { MessageBox.Show("Ingrese un monto válido.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error); return; }
+            if (a.Balance < amount) { MessageBox.Show("Saldo insuficiente.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error); return; }
+            a.Balance -= amount;
+            if (!a.ServicePaymentCounts.ContainsKey(service)) a.ServicePaymentCounts[service] = 0;
+            if (!a.ServicePaymentTotals.ContainsKey(service)) a.ServicePaymentTotals[service] = 0m;
+            a.ServicePaymentCounts[service]++;
+            a.ServicePaymentTotals[service] += amount;
+            UpdateAccountLabel();
+            historyGrid.Rows.Insert(0, DateTime.Now.ToString("HH:mm"), "Pago Servicio", $"${amount:0.00}", service);
+            MessageBox.Show($"Pago de servicio realizado.\nServicio: {service}\nMonto: ${amount:0.00}\nSaldo actual: ${a.Balance:0.00}", "Pago de Servicio", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void BtnTagRecharge_Click(object sender, EventArgs e)
+        {
+            var a = AccountManager.CurrentAccount;
+            if (a == null)
+            {
+                MessageBox.Show("Inicie sesión en una cuenta primero.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+            string provider = cmbTagProvider.SelectedItem.ToString();
+            decimal amount = numTagAmount.Value;
+            if (amount <= 0) { MessageBox.Show("Ingrese un monto válido.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error); return; }
+            if (a.Balance < amount) { MessageBox.Show("Saldo insuficiente.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error); return; }
+            a.Balance -= amount;
+            if (!a.TagRechargeCounts.ContainsKey(provider)) a.TagRechargeCounts[provider] = 0;
+            if (!a.TagRechargeTotals.ContainsKey(provider)) a.TagRechargeTotals[provider] = 0m;
+            a.TagRechargeCounts[provider]++;
+            a.TagRechargeTotals[provider] += amount;
+            UpdateAccountLabel();
+            historyGrid.Rows.Insert(0, DateTime.Now.ToString("HH:mm"), "Recarga Tag", $"${amount:0.00}", provider);
+            MessageBox.Show($"Recarga de Tag realizada.\nProveedor: {provider}\nMonto: ${amount:0.00}\nSaldo actual: ${a.Balance:0.00}", "Recarga de Tag", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private void numTransferAmount_ValueChanged(object s, EventArgs e)

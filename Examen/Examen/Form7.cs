@@ -27,124 +27,170 @@ namespace Examen
         private void InitializeLoginControls()
         {
             this.Text = "Mercado Pago - Iniciar sesión";
-            this.Size = new Size(520, 480);
-            this.BackColor = Color.FromArgb(227, 242, 253); // pastel MP blue
+            this.Size = new Size(780, 500);
+            this.BackColor = Color.FromArgb(245, 248, 255);
             this.Font = new Font("Segoe UI", 10f);
             this.FormBorderStyle = FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
             this.StartPosition = FormStartPosition.CenterScreen;
 
-            // Card panel centered
-            Panel card = new Panel
+            // ── Left brand panel (MP blue gradient) ──
+            Panel pnlBrand = new Panel
             {
-                Size = new Size(400, 360),
-                Location = new Point(50, 50),
-                BackColor = Color.White,
-                Padding = new Padding(30)
-            };
-            card.Paint += (s, ev) =>
-            {
-                var rect = new Rectangle(0, 0, card.Width - 1, card.Height - 1);
-                ev.Graphics.DrawRectangle(new Pen(Color.FromArgb(187, 222, 251), 2), rect);
-            };
-
-            // Header stripe
-            Panel stripe = new Panel
-            {
-                Size = new Size(400, 6),
+                Size = new Size(320, 462),
                 Location = new Point(0, 0),
-                BackColor = Color.FromArgb(66, 165, 245) // MP accent blue
+                BackColor = Color.FromArgb(30, 136, 229)
             };
-            card.Controls.Add(stripe);
+            pnlBrand.Paint += (s, ev) =>
+            {
+                using (var brush = new System.Drawing.Drawing2D.LinearGradientBrush(
+                    pnlBrand.ClientRectangle,
+                    Color.FromArgb(21, 101, 192),
+                    Color.FromArgb(66, 165, 245),
+                    System.Drawing.Drawing2D.LinearGradientMode.Vertical))
+                {
+                    ev.Graphics.FillRectangle(brush, pnlBrand.ClientRectangle);
+                }
+            };
 
-            // Logo / Title
-            Label lblTitle = new Label
+            Label lblBrandIcon = new Label
+            {
+                Text = "💳",
+                Font = new Font("Segoe UI", 48f),
+                ForeColor = Color.White,
+                AutoSize = true,
+                Location = new Point(110, 80),
+                BackColor = Color.Transparent
+            };
+            Label lblBrandName = new Label
             {
                 Text = "Mercado Pago",
-                Font = new Font("Segoe UI", 18f, FontStyle.Bold),
+                Font = new Font("Segoe UI", 22f, FontStyle.Bold),
+                ForeColor = Color.White,
+                AutoSize = true,
+                Location = new Point(52, 170),
+                BackColor = Color.Transparent
+            };
+            Label lblBrandDesc = new Label
+            {
+                Text = "Tu dinero rinde más.\nPagá, cobrá e invertí\ndesde un solo lugar.",
+                Font = new Font("Segoe UI", 10.5f),
+                ForeColor = Color.FromArgb(200, 227, 255),
+                Size = new Size(260, 70),
+                Location = new Point(52, 215),
+                BackColor = Color.Transparent
+            };
+            Label lblBrandFooter = new Label
+            {
+                Text = "Seguro • Rápido • Simple",
+                Font = new Font("Segoe UI", 9f, FontStyle.Italic),
+                ForeColor = Color.FromArgb(160, 210, 255),
+                AutoSize = true,
+                Location = new Point(70, 410),
+                BackColor = Color.Transparent
+            };
+            pnlBrand.Controls.Add(lblBrandIcon);
+            pnlBrand.Controls.Add(lblBrandName);
+            pnlBrand.Controls.Add(lblBrandDesc);
+            pnlBrand.Controls.Add(lblBrandFooter);
+
+            // ── Right login panel ──
+            Panel pnlLogin = new Panel
+            {
+                Size = new Size(444, 462),
+                Location = new Point(320, 0),
+                BackColor = Color.White
+            };
+
+            Label lblTitle = new Label
+            {
+                Text = "Iniciar sesión",
+                Font = new Font("Segoe UI", 20f, FontStyle.Bold),
                 ForeColor = Color.FromArgb(30, 136, 229),
                 AutoSize = true,
-                Location = new Point(30, 24)
+                Location = new Point(40, 60)
             };
-
             Label lblSub = new Label
             {
-                Text = "Ingresa a tu cuenta",
-                Font = new Font("Segoe UI", 11f),
+                Text = "Ingresa tus datos para continuar",
+                Font = new Font("Segoe UI", 10f),
                 ForeColor = Color.FromArgb(120, 144, 156),
                 AutoSize = true,
-                Location = new Point(30, 60)
+                Location = new Point(40, 98)
             };
 
-            // Email field
+            // Email
             Label lblEmail = new Label
             {
-                Text = "Correo electrónico",
-                Font = new Font("Segoe UI", 9f, FontStyle.Bold),
+                Text = "✉  Correo electrónico",
+                Font = new Font("Segoe UI", 9.5f, FontStyle.Bold),
                 ForeColor = Color.FromArgb(69, 90, 100),
                 AutoSize = true,
-                Location = new Point(30, 100)
+                Location = new Point(40, 150)
             };
             txtEmailLogin = new TextBox
             {
-                Location = new Point(30, 122),
-                Size = new Size(340, 28),
-                Font = new Font("Segoe UI", 11f),
+                Location = new Point(40, 174),
+                Size = new Size(360, 30),
+                Font = new Font("Segoe UI", 11.5f),
                 BorderStyle = BorderStyle.FixedSingle,
-                BackColor = Color.FromArgb(248, 250, 252)
+                BackColor = Color.FromArgb(245, 248, 255)
             };
 
-            // Password field
+            // Password
             Label lblPass = new Label
             {
-                Text = "Contraseña",
-                Font = new Font("Segoe UI", 9f, FontStyle.Bold),
+                Text = "🔒  Contraseña",
+                Font = new Font("Segoe UI", 9.5f, FontStyle.Bold),
                 ForeColor = Color.FromArgb(69, 90, 100),
                 AutoSize = true,
-                Location = new Point(30, 162)
+                Location = new Point(40, 220)
             };
             txtPasswordLogin = new TextBox
             {
-                Location = new Point(30, 184),
-                Size = new Size(340, 28),
-                Font = new Font("Segoe UI", 11f),
+                Location = new Point(40, 244),
+                Size = new Size(360, 30),
+                Font = new Font("Segoe UI", 11.5f),
                 UseSystemPasswordChar = true,
                 BorderStyle = BorderStyle.FixedSingle,
-                BackColor = Color.FromArgb(248, 250, 252)
+                BackColor = Color.FromArgb(245, 248, 255)
             };
 
-            // Login button - full width accent
+            // Login button
             btnLoginLocal = new Button
             {
                 Text = "Iniciar sesión",
-                Location = new Point(30, 230),
-                Size = new Size(340, 42),
+                Location = new Point(40, 300),
+                Size = new Size(360, 46),
                 BackColor = Color.FromArgb(66, 165, 245),
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat,
-                Font = new Font("Segoe UI", 11f, FontStyle.Bold),
+                Font = new Font("Segoe UI", 12f, FontStyle.Bold),
                 Cursor = Cursors.Hand
             };
             btnLoginLocal.FlatAppearance.BorderSize = 0;
 
-            // Separator line
+            // Separator
             Label sep = new Label
             {
-                Size = new Size(340, 1),
-                Location = new Point(30, 286),
-                BackColor = Color.FromArgb(207, 216, 220)
+                Text = "─────────  o  ─────────",
+                Font = new Font("Segoe UI", 8.5f),
+                ForeColor = Color.FromArgb(180, 190, 200),
+                Size = new Size(360, 20),
+                Location = new Point(40, 360),
+                TextAlign = ContentAlignment.MiddleCenter
             };
 
-            // Create account and back as link-style
+            // Create + Back buttons
             btnCreateLocal = new Button
             {
                 Text = "Crear cuenta nueva",
-                Location = new Point(30, 298),
-                Size = new Size(165, 36),
+                Location = new Point(40, 390),
+                Size = new Size(175, 40),
                 BackColor = Color.FromArgb(232, 245, 233),
                 ForeColor = Color.FromArgb(56, 142, 60),
                 FlatStyle = FlatStyle.Flat,
-                Font = new Font("Segoe UI", 9f, FontStyle.Bold),
+                Font = new Font("Segoe UI", 9.5f, FontStyle.Bold),
                 Cursor = Cursors.Hand
             };
             btnCreateLocal.FlatAppearance.BorderColor = Color.FromArgb(165, 214, 167);
@@ -152,12 +198,12 @@ namespace Examen
             btnBackLogin = new Button
             {
                 Text = "Salir",
-                Location = new Point(205, 298),
-                Size = new Size(165, 36),
+                Location = new Point(225, 390),
+                Size = new Size(175, 40),
                 BackColor = Color.FromArgb(255, 243, 224),
                 ForeColor = Color.FromArgb(230, 126, 34),
                 FlatStyle = FlatStyle.Flat,
-                Font = new Font("Segoe UI", 9f, FontStyle.Bold),
+                Font = new Font("Segoe UI", 9.5f, FontStyle.Bold),
                 Cursor = Cursors.Hand
             };
             btnBackLogin.FlatAppearance.BorderColor = Color.FromArgb(255, 224, 178);
@@ -166,17 +212,19 @@ namespace Examen
             btnCreateLocal.Click += BtnCreateLocal_Click;
             btnBackLogin.Click += BtnBackLogin_Click;
 
-            card.Controls.Add(lblTitle);
-            card.Controls.Add(lblSub);
-            card.Controls.Add(lblEmail);
-            card.Controls.Add(txtEmailLogin);
-            card.Controls.Add(lblPass);
-            card.Controls.Add(txtPasswordLogin);
-            card.Controls.Add(btnLoginLocal);
-            card.Controls.Add(sep);
-            card.Controls.Add(btnCreateLocal);
-            card.Controls.Add(btnBackLogin);
-            this.Controls.Add(card);
+            pnlLogin.Controls.Add(lblTitle);
+            pnlLogin.Controls.Add(lblSub);
+            pnlLogin.Controls.Add(lblEmail);
+            pnlLogin.Controls.Add(txtEmailLogin);
+            pnlLogin.Controls.Add(lblPass);
+            pnlLogin.Controls.Add(txtPasswordLogin);
+            pnlLogin.Controls.Add(btnLoginLocal);
+            pnlLogin.Controls.Add(sep);
+            pnlLogin.Controls.Add(btnCreateLocal);
+            pnlLogin.Controls.Add(btnBackLogin);
+
+            this.Controls.Add(pnlBrand);
+            this.Controls.Add(pnlLogin);
         }
 
         private void BtnCreateLocal_Click(object sender, EventArgs e)

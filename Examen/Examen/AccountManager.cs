@@ -23,6 +23,12 @@ namespace Examen
         public Dictionary<string, decimal> TransferTotals { get; } = new Dictionary<string, decimal>();
         public Dictionary<string, int> WithdrawCounts { get; } = new Dictionary<string, int>();
         public Dictionary<string, decimal> WithdrawTotals { get; } = new Dictionary<string, decimal>();
+        public Dictionary<string, int> RechargeCounts { get; } = new Dictionary<string, int>();
+        public Dictionary<string, decimal> RechargeTotals { get; } = new Dictionary<string, decimal>();
+        public Dictionary<string, int> ServicePaymentCounts { get; } = new Dictionary<string, int>();
+        public Dictionary<string, decimal> ServicePaymentTotals { get; } = new Dictionary<string, decimal>();
+        public Dictionary<string, int> TagRechargeCounts { get; } = new Dictionary<string, int>();
+        public Dictionary<string, decimal> TagRechargeTotals { get; } = new Dictionary<string, decimal>();
 
         public int TotalDeposits => DepositCounts.Values.Sum();
         public decimal TotalDeposited => DepositTotals.Values.Sum();
@@ -30,6 +36,12 @@ namespace Examen
         public decimal TotalTransferred => TransferTotals.Values.Sum();
         public int TotalWithdrawals => WithdrawCounts.Values.Sum();
         public decimal TotalWithdrawn => WithdrawTotals.Values.Sum();
+        public int TotalRecharges => RechargeCounts.Values.Sum();
+        public decimal TotalRecharged => RechargeTotals.Values.Sum();
+        public int TotalServicePayments => ServicePaymentCounts.Values.Sum();
+        public decimal TotalServicesPaid => ServicePaymentTotals.Values.Sum();
+        public int TotalTagRecharges => TagRechargeCounts.Values.Sum();
+        public decimal TotalTagRecharged => TagRechargeTotals.Values.Sum();
 
         public Account(string owner, string cardNumber, string accountNumber, string phone, string address, string email, string password)
         {

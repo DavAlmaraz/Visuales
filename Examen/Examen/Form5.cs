@@ -310,134 +310,198 @@ namespace Examen
         {
             this.Text = "Mercado Libre - Tienda";
             this.Size = new Size(1020, 720);
-            this.BackColor = Color.FromArgb(255, 253, 240); // ML pastel cream
+            this.BackColor = Color.FromArgb(245, 248, 255);
             this.Font = new Font("Segoe UI", 9.5f);
             this.StartPosition = FormStartPosition.CenterScreen;
 
-            // Top header panel (ML gold)
+            // ── Top header (ML gold gradient) ──
             Panel topHeader = new Panel
             {
-                Size = new Size(1020, 50),
+                Size = new Size(1020, 56),
                 Location = new Point(0, 0),
-                BackColor = Color.FromArgb(255, 214, 0),
-                Dock = DockStyle.Top
+                Dock = DockStyle.Top,
+                BackColor = Color.FromArgb(255, 214, 0)
+            };
+            topHeader.Paint += (s, ev) =>
+            {
+                using (var brush = new System.Drawing.Drawing2D.LinearGradientBrush(
+                    topHeader.ClientRectangle,
+                    Color.FromArgb(255, 193, 7),
+                    Color.FromArgb(255, 224, 80),
+                    System.Drawing.Drawing2D.LinearGradientMode.Horizontal))
+                {
+                    ev.Graphics.FillRectangle(brush, topHeader.ClientRectangle);
+                }
             };
             Label lblStoreTitle = new Label
             {
-                Text = "Mercado Libre - Tienda",
-                Font = new Font("Segoe UI", 14f, FontStyle.Bold),
+                Text = "🛒  Mercado Libre - Tienda",
+                Font = new Font("Segoe UI", 15f, FontStyle.Bold),
                 ForeColor = Color.FromArgb(50, 40, 10),
                 AutoSize = true,
-                Location = new Point(18, 12),
+                Location = new Point(18, 14),
                 BackColor = Color.Transparent
             };
+            btnBackStore = new Button
+            {
+                Text = "← Volver al menú",
+                Location = new Point(850, 12),
+                Size = new Size(140, 32),
+                BackColor = Color.FromArgb(255, 255, 255, 120),
+                ForeColor = Color.FromArgb(50, 40, 10),
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Segoe UI", 9f, FontStyle.Bold),
+                Cursor = Cursors.Hand
+            };
+            btnBackStore.FlatAppearance.BorderColor = Color.FromArgb(200, 170, 0);
+            btnBackStore.Click += (s, e) => { if (this.Owner != null) this.Owner.Show(); this.Close(); };
             topHeader.Controls.Add(lblStoreTitle);
+            topHeader.Controls.Add(btnBackStore);
 
-            // Product selection area
-            Label lblProducto = new Label { Text = "Producto:", Location = new Point(18, 66), AutoSize = true, ForeColor = Color.FromArgb(90, 80, 60), Font = new Font("Segoe UI", 10f, FontStyle.Bold) };
-            cmbProductosLocal = new ComboBox { Location = new Point(100, 62), Width = 320, DropDownStyle = ComboBoxStyle.DropDownList, Font = new Font("Segoe UI", 9.5f) };
-            Label lblCantidad = new Label { Text = "Cantidad:", Location = new Point(440, 66), AutoSize = true, ForeColor = Color.FromArgb(90, 80, 60) };
-            numCantidadLocal = new NumericUpDown { Location = new Point(510, 62), Width = 80, Minimum = 1, Value = 1, Font = new Font("Segoe UI", 9.5f) };
+            // ── TabControl ──
+            TabControl tabs = new TabControl
+            {
+                Location = new Point(10, 62),
+                Size = new Size(984, 610),
+                Font = new Font("Segoe UI", 10f, FontStyle.Bold)
+            };
 
-            btnAgregarLocal = new Button { Text = "Agregar al carrito", Location = new Point(610, 58), Size = new Size(170, 34), BackColor = Color.FromArgb(255, 202, 40), ForeColor = Color.FromArgb(50, 40, 10), FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9.5f, FontStyle.Bold), Cursor = Cursors.Hand };
+            // ═══════════════════════════════════════
+            //  TAB 1: Productos y Carrito
+            // ═══════════════════════════════════════
+            TabPage tabCompra = new TabPage("🛍  Productos y Carrito")
+            {
+                BackColor = Color.FromArgb(255, 253, 245),
+                Padding = new Padding(10)
+            };
+
+            // Product selection row
+            Panel pnlProductRow = new Panel
+            {
+                Location = new Point(14, 10),
+                Size = new Size(940, 50),
+                BackColor = Color.White
+            };
+            pnlProductRow.Paint += (s, ev) =>
+            {
+                ev.Graphics.FillRectangle(new SolidBrush(Color.FromArgb(255, 202, 40)), 0, 0, pnlProductRow.Width, 4);
+                ev.Graphics.DrawRectangle(new Pen(Color.FromArgb(255, 236, 179)), 0, 0, pnlProductRow.Width - 1, pnlProductRow.Height - 1);
+            };
+            Label lblProducto = new Label { Text = "Producto:", Location = new Point(14, 16), AutoSize = true, ForeColor = Color.FromArgb(90, 80, 60), Font = new Font("Segoe UI", 9.5f, FontStyle.Bold) };
+            cmbProductosLocal = new ComboBox { Location = new Point(90, 12), Width = 340, DropDownStyle = ComboBoxStyle.DropDownList, Font = new Font("Segoe UI", 9.5f) };
+            Label lblCantidad = new Label { Text = "Cantidad:", Location = new Point(450, 16), AutoSize = true, ForeColor = Color.FromArgb(90, 80, 60) };
+            numCantidadLocal = new NumericUpDown { Location = new Point(524, 12), Width = 80, Minimum = 1, Value = 1, Font = new Font("Segoe UI", 9.5f) };
+            btnAgregarLocal = new Button { Text = "➕ Agregar", Location = new Point(624, 8), Size = new Size(140, 34), BackColor = Color.FromArgb(255, 202, 40), ForeColor = Color.FromArgb(50, 40, 10), FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9.5f, FontStyle.Bold), Cursor = Cursors.Hand };
             btnAgregarLocal.FlatAppearance.BorderSize = 0;
-            btnVerCarritoLocal = new Button { Text = "Confirmar compra", Location = new Point(790, 58), Size = new Size(160, 34), BackColor = Color.FromArgb(66, 165, 245), ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9.5f, FontStyle.Bold), Cursor = Cursors.Hand };
+            btnVerCarritoLocal = new Button { Text = "✅ Confirmar compra", Location = new Point(780, 8), Size = new Size(150, 34), BackColor = Color.FromArgb(66, 165, 245), ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9.5f, FontStyle.Bold), Cursor = Cursors.Hand };
             btnVerCarritoLocal.FlatAppearance.BorderSize = 0;
+            pnlProductRow.Controls.AddRange(new Control[] { lblProducto, cmbProductosLocal, lblCantidad, numCantidadLocal, btnAgregarLocal, btnVerCarritoLocal });
 
-            // Cart panel (right side)
-            Panel pnlCart = new Panel { Location = new Point(640, 108), Size = new Size(340, 240), BackColor = Color.White };
-            pnlCart.Paint += (s, ev) => { ev.Graphics.DrawRectangle(new Pen(Color.FromArgb(255, 236, 179)), 0, 0, pnlCart.Width - 1, pnlCart.Height - 1); };
-            Label lblCarrito = new Label { Text = "🛒 Carrito", Location = new Point(10, 6), AutoSize = true, BackColor = Color.Transparent, ForeColor = Color.FromArgb(245, 166, 35), Font = new Font("Segoe UI", 10f, FontStyle.Bold) };
-            lstCarritoLocal = new ListBox { Location = new Point(4, 30), Size = new Size(332, 206), SelectionMode = SelectionMode.MultiExtended, BorderStyle = BorderStyle.None, BackColor = Color.White, Font = new Font("Segoe UI", 9f) };
-            pnlCart.Controls.Add(lblCarrito);
-            pnlCart.Controls.Add(lstCarritoLocal);
-
-            // Payment panel (left side)
-            Panel pnlPago = new Panel { Location = new Point(18, 108), Size = new Size(600, 150), BackColor = Color.White };
+            // Left: Payment method panel
+            Panel pnlPago = new Panel { Location = new Point(14, 72), Size = new Size(560, 240), BackColor = Color.White };
             pnlPago.Paint += (s, ev) =>
             {
                 ev.Graphics.FillRectangle(new SolidBrush(Color.FromArgb(66, 165, 245)), 0, 0, 5, pnlPago.Height);
                 ev.Graphics.DrawRectangle(new Pen(Color.FromArgb(187, 222, 251)), 0, 0, pnlPago.Width - 1, pnlPago.Height - 1);
             };
-            Label lblPagoTitle = new Label { Text = "Método de pago", Font = new Font("Segoe UI", 10f, FontStyle.Bold), ForeColor = Color.FromArgb(30, 136, 229), Location = new Point(16, 6), AutoSize = true, BackColor = Color.Transparent };
+            Label lblPagoTitle = new Label { Text = "💳  Método de pago", Font = new Font("Segoe UI", 11f, FontStyle.Bold), ForeColor = Color.FromArgb(30, 136, 229), Location = new Point(16, 10), AutoSize = true, BackColor = Color.Transparent };
             grpPagoLocal = new GroupBox { Location = new Point(0, 0), Size = new Size(0, 0), Visible = false };
-            rdoContadoLocal = new RadioButton { Text = "Contado", Location = new Point(16, 30), AutoSize = true, Font = new Font("Segoe UI", 9f) };
-            rdoTarjetaMSILocal = new RadioButton { Text = "Tarjeta crédito (MSI)", Location = new Point(140, 30), AutoSize = true, Font = new Font("Segoe UI", 9f) };
-            rdoMercadoPagoLocal = new RadioButton { Text = "Mercado Pago", Location = new Point(340, 30), AutoSize = true, Font = new Font("Segoe UI", 9f) };
+            rdoContadoLocal = new RadioButton { Text = "Contado", Location = new Point(16, 40), AutoSize = true, Font = new Font("Segoe UI", 9.5f) };
+            rdoTarjetaMSILocal = new RadioButton { Text = "Tarjeta crédito (MSI)", Location = new Point(160, 40), AutoSize = true, Font = new Font("Segoe UI", 9.5f) };
+            rdoMercadoPagoLocal = new RadioButton { Text = "Mercado Pago", Location = new Point(360, 40), AutoSize = true, Font = new Font("Segoe UI", 9.5f) };
 
-            cmbContadoOpcionesLocal = new ComboBox { Location = new Point(16, 58), Width = 180, DropDownStyle = ComboBoxStyle.DropDownList, Font = new Font("Segoe UI", 9f) };
-            cmbContadoOpcionesLocal.Items.AddRange(new object[] { "Deposito", "Tarjeta débito", "Tarjeta crédito" });
+            // Separator line
+            Label paymentSep = new Label { Size = new Size(520, 1), Location = new Point(16, 68), BackColor = Color.FromArgb(220, 230, 240) };
+
+            cmbContadoOpcionesLocal = new ComboBox { Location = new Point(16, 80), Width = 250, DropDownStyle = ComboBoxStyle.DropDownList, Font = new Font("Segoe UI", 9.5f) };
+            cmbContadoOpcionesLocal.Items.AddRange(new object[] { "Deposito Oxxo", "Deposito Seven Eleven", "Deposito bancario", "Transferencia", "Tarjeta débito", "Tarjeta crédito" });
             cmbContadoOpcionesLocal.SelectedIndex = 0;
 
-            cmbMSIMesesLocal = new ComboBox { Location = new Point(210, 58), Width = 120, DropDownStyle = ComboBoxStyle.DropDownList, Font = new Font("Segoe UI", 9f) };
+            cmbMSIMesesLocal = new ComboBox { Location = new Point(16, 80), Width = 150, DropDownStyle = ComboBoxStyle.DropDownList, Font = new Font("Segoe UI", 9.5f) };
             cmbMSIMesesLocal.Items.AddRange(new object[] { "3", "6", "12" });
             cmbMSIMesesLocal.SelectedIndex = 0;
 
-            cmbMPOpcionesLocal = new ComboBox { Location = new Point(340, 58), Width = 240, DropDownStyle = ComboBoxStyle.DropDownList, Font = new Font("Segoe UI", 9f) };
+            cmbMPOpcionesLocal = new ComboBox { Location = new Point(16, 80), Width = 280, DropDownStyle = ComboBoxStyle.DropDownList, Font = new Font("Segoe UI", 9.5f) };
             cmbMPOpcionesLocal.Items.AddRange(new object[] { "Contado", "3 meses (10% mensual)", "6 meses (10% mensual)" });
             cmbMPOpcionesLocal.SelectedIndex = 0;
 
-            btnResumenLocal = new Button { Text = "Ver resumen", Location = new Point(16, 100), Size = new Size(150, 34), BackColor = Color.FromArgb(232, 245, 233), ForeColor = Color.FromArgb(27, 94, 32), FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9f, FontStyle.Bold), Cursor = Cursors.Hand };
-            btnResumenLocal.FlatAppearance.BorderColor = Color.FromArgb(165, 214, 167);
-
-            pnlPago.Controls.Add(lblPagoTitle);
-            pnlPago.Controls.Add(rdoContadoLocal);
-            pnlPago.Controls.Add(rdoTarjetaMSILocal);
-            pnlPago.Controls.Add(rdoMercadoPagoLocal);
-            pnlPago.Controls.Add(cmbContadoOpcionesLocal);
-            pnlPago.Controls.Add(cmbMSIMesesLocal);
-            pnlPago.Controls.Add(cmbMPOpcionesLocal);
-            pnlPago.Controls.Add(btnResumenLocal);
-
-            // Shipping & cancellation row
-            Label lblEnvio = new Label { Text = "Envío:", Location = new Point(18, 272), AutoSize = true, ForeColor = Color.FromArgb(90, 80, 60), Font = new Font("Segoe UI", 9f, FontStyle.Bold) };
-            rdoEnvioNormal = new RadioButton { Text = "Normal", Location = new Point(80, 270), AutoSize = true, Font = new Font("Segoe UI", 9f) };
-            rdoEnvioFull = new RadioButton { Text = "Full", Location = new Point(170, 270), AutoSize = true, Font = new Font("Segoe UI", 9f) };
+            // Shipping row
+            Label lblEnvio = new Label { Text = "📦  Envío:", Location = new Point(16, 120), AutoSize = true, ForeColor = Color.FromArgb(90, 80, 60), Font = new Font("Segoe UI", 9.5f, FontStyle.Bold) };
+            rdoEnvioNormal = new RadioButton { Text = "Normal", Location = new Point(100, 118), AutoSize = true, Font = new Font("Segoe UI", 9.5f) };
+            rdoEnvioFull = new RadioButton { Text = "Full", Location = new Point(200, 118), AutoSize = true, Font = new Font("Segoe UI", 9.5f) };
             rdoEnvioNormal.Checked = true;
 
-            cmbCancelReasons = new ComboBox { Location = new Point(260, 268), Width = 220, DropDownStyle = ComboBoxStyle.DropDownList, Font = new Font("Segoe UI", 9f) };
+            // Cancellation row
+            Label lblCancelTitle = new Label { Text = "❌  Cancelación:", Location = new Point(16, 156), AutoSize = true, ForeColor = Color.FromArgb(198, 40, 40), Font = new Font("Segoe UI", 9.5f, FontStyle.Bold) };
+            cmbCancelReasons = new ComboBox { Location = new Point(150, 152), Width = 200, DropDownStyle = ComboBoxStyle.DropDownList, Font = new Font("Segoe UI", 9f) };
             cmbCancelReasons.Items.AddRange(new object[] { "Derecho de compra", "Producto defectuoso", "Producto con demora" });
             cmbCancelReasons.SelectedIndex = 0;
-            chkCancelarTodo = new CheckBox { Text = "Cancelar todo", Location = new Point(500, 270), AutoSize = true, Font = new Font("Segoe UI", 9f) };
-            btnCancelarLocal = new Button { Text = "Cancelar compra", Location = new Point(640, 264), Size = new Size(160, 34), BackColor = Color.FromArgb(255, 235, 238), ForeColor = Color.FromArgb(198, 40, 40), FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9f, FontStyle.Bold), Cursor = Cursors.Hand };
+            chkCancelarTodo = new CheckBox { Text = "Todo el carrito", Location = new Point(366, 154), AutoSize = true, Font = new Font("Segoe UI", 9f) };
+
+            btnCancelarLocal = new Button { Text = "Cancelar compra", Location = new Point(16, 192), Size = new Size(170, 36), BackColor = Color.FromArgb(255, 235, 238), ForeColor = Color.FromArgb(198, 40, 40), FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9.5f, FontStyle.Bold), Cursor = Cursors.Hand };
             btnCancelarLocal.FlatAppearance.BorderColor = Color.FromArgb(239, 154, 154);
+            btnResumenLocal = new Button { Text = "📊 Ver resumen", Location = new Point(200, 192), Size = new Size(160, 36), BackColor = Color.FromArgb(232, 245, 233), ForeColor = Color.FromArgb(27, 94, 32), FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9.5f, FontStyle.Bold), Cursor = Cursors.Hand };
+            btnResumenLocal.FlatAppearance.BorderColor = Color.FromArgb(165, 214, 167);
+
+            pnlPago.Controls.AddRange(new Control[] { lblPagoTitle, rdoContadoLocal, rdoTarjetaMSILocal, rdoMercadoPagoLocal, paymentSep, cmbContadoOpcionesLocal, cmbMSIMesesLocal, cmbMPOpcionesLocal, lblEnvio, rdoEnvioNormal, rdoEnvioFull, lblCancelTitle, cmbCancelReasons, chkCancelarTodo, btnCancelarLocal, btnResumenLocal });
+
+            // Right: Cart panel
+            Panel pnlCart = new Panel { Location = new Point(590, 72), Size = new Size(364, 240), BackColor = Color.White };
+            pnlCart.Paint += (s, ev) =>
+            {
+                ev.Graphics.FillRectangle(new SolidBrush(Color.FromArgb(245, 166, 35)), 0, 0, pnlCart.Width, 4);
+                ev.Graphics.DrawRectangle(new Pen(Color.FromArgb(255, 236, 179)), 0, 0, pnlCart.Width - 1, pnlCart.Height - 1);
+            };
+            Label lblCarrito = new Label { Text = "🛒 Carrito de compras", Location = new Point(12, 12), AutoSize = true, BackColor = Color.Transparent, ForeColor = Color.FromArgb(245, 166, 35), Font = new Font("Segoe UI", 11f, FontStyle.Bold) };
+            lstCarritoLocal = new ListBox { Location = new Point(6, 40), Size = new Size(352, 194), SelectionMode = SelectionMode.MultiExtended, BorderStyle = BorderStyle.None, BackColor = Color.White, Font = new Font("Segoe UI", 9f) };
+            pnlCart.Controls.Add(lblCarrito);
+            pnlCart.Controls.Add(lstCarritoLocal);
+
+            tabCompra.Controls.Add(pnlProductRow);
+            tabCompra.Controls.Add(pnlPago);
+            tabCompra.Controls.Add(pnlCart);
+
+            // ═══════════════════════════════════════
+            //  TAB 2: Historial de Ventas
+            // ═══════════════════════════════════════
+            TabPage tabVentas = new TabPage("📦  Historial de Ventas")
+            {
+                BackColor = Color.FromArgb(245, 248, 255),
+                Padding = new Padding(10)
+            };
+
+            // Sales list (left)
+            Label lblVentas = new Label { Text = "📦 Ventas registradas", Location = new Point(14, 10), AutoSize = true, ForeColor = Color.FromArgb(69, 90, 100), Font = new Font("Segoe UI", 11f, FontStyle.Bold) };
+            lstVentas = new ListBox { Location = new Point(14, 38), Size = new Size(550, 420), BorderStyle = BorderStyle.FixedSingle, BackColor = Color.White, Font = new Font("Segoe UI", 9f) };
+
+            // Sale items (right)
+            Label lblVentaDetail = new Label { Text = "📋 Detalle de venta", Location = new Point(580, 10), AutoSize = true, ForeColor = Color.FromArgb(69, 90, 100), Font = new Font("Segoe UI", 11f, FontStyle.Bold) };
+            lstVentaItems = new ListBox { Location = new Point(580, 38), Size = new Size(374, 420), SelectionMode = SelectionMode.MultiExtended, BorderStyle = BorderStyle.FixedSingle, BackColor = Color.White, Font = new Font("Segoe UI", 9f) };
+
+            // Cancel sale controls at bottom
+            Panel pnlCancelSale = new Panel { Location = new Point(14, 470), Size = new Size(940, 50), BackColor = Color.White };
+            pnlCancelSale.Paint += (s, ev) =>
+            {
+                ev.Graphics.FillRectangle(new SolidBrush(Color.FromArgb(255, 152, 0)), 0, 0, pnlCancelSale.Width, 4);
+                ev.Graphics.DrawRectangle(new Pen(Color.FromArgb(255, 224, 178)), 0, 0, pnlCancelSale.Width - 1, pnlCancelSale.Height - 1);
+            };
+            btnCancelarVenta = new Button { Text = "❌ Cancelar venta seleccionada", Location = new Point(14, 12), Size = new Size(260, 30), BackColor = Color.FromArgb(255, 243, 224), ForeColor = Color.FromArgb(230, 126, 34), FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9.5f, FontStyle.Bold), Cursor = Cursors.Hand };
+            btnCancelarVenta.FlatAppearance.BorderColor = Color.FromArgb(255, 224, 178);
+            chkCancelarVentaTodo = new CheckBox { Text = "Cancelar toda la venta", Location = new Point(300, 14), AutoSize = true, Font = new Font("Segoe UI", 9.5f) };
+            pnlCancelSale.Controls.Add(btnCancelarVenta);
+            pnlCancelSale.Controls.Add(chkCancelarVentaTodo);
+
+            tabVentas.Controls.Add(lblVentas);
+            tabVentas.Controls.Add(lstVentas);
+            tabVentas.Controls.Add(lblVentaDetail);
+            tabVentas.Controls.Add(lstVentaItems);
+            tabVentas.Controls.Add(pnlCancelSale);
+
+            tabs.TabPages.Add(tabCompra);
+            tabs.TabPages.Add(tabVentas);
 
             this.Controls.Add(topHeader);
-            this.Controls.Add(lblEnvio);
-            this.Controls.Add(rdoEnvioNormal);
-            this.Controls.Add(rdoEnvioFull);
-            this.Controls.Add(cmbCancelReasons);
-            this.Controls.Add(chkCancelarTodo);
-            this.Controls.Add(btnCancelarLocal);
-
-            // Sales history section
-            Label lblVentas = new Label { Text = "📦 Ventas registradas", Location = new Point(18, 310), AutoSize = true, BackColor = Color.Transparent, ForeColor = Color.FromArgb(69, 90, 100), Font = new Font("Segoe UI", 10f, FontStyle.Bold) };
-            lstVentas = new ListBox { Location = new Point(18, 334), Size = new Size(560, 150), BorderStyle = BorderStyle.FixedSingle, BackColor = Color.White, Font = new Font("Segoe UI", 9f) };
-            lstVentaItems = new ListBox { Location = new Point(590, 334), Size = new Size(390, 150), SelectionMode = SelectionMode.MultiExtended, BorderStyle = BorderStyle.FixedSingle, BackColor = Color.White, Font = new Font("Segoe UI", 9f) };
-            btnCancelarVenta = new Button { Text = "Cancelar venta seleccionada", Location = new Point(18, 492), Size = new Size(240, 34), BackColor = Color.FromArgb(255, 243, 224), ForeColor = Color.FromArgb(230, 126, 34), FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9f, FontStyle.Bold), Cursor = Cursors.Hand };
-            btnCancelarVenta.FlatAppearance.BorderColor = Color.FromArgb(255, 224, 178);
-            chkCancelarVentaTodo = new CheckBox { Text = "Cancelar toda la venta", Location = new Point(280, 498), AutoSize = true, Font = new Font("Segoe UI", 9f) };
-
-            this.Controls.Add(lblVentas);
-            this.Controls.Add(lstVentas);
-            this.Controls.Add(lstVentaItems);
-            this.Controls.Add(btnCancelarVenta);
-            this.Controls.Add(chkCancelarVentaTodo);
-
-            this.Controls.Add(lblProducto);
-            this.Controls.Add(cmbProductosLocal);
-            this.Controls.Add(lblCantidad);
-            this.Controls.Add(numCantidadLocal);
-            this.Controls.Add(btnAgregarLocal);
-            this.Controls.Add(btnVerCarritoLocal);
-            this.Controls.Add(pnlCart);
-            this.Controls.Add(pnlPago);
-
-            // Back button
-            btnBackStore = new Button { Text = "← Volver", Location = new Point(820, 264), Size = new Size(120, 34), BackColor = Color.Transparent, ForeColor = Color.FromArgb(66, 165, 245), FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9f, FontStyle.Bold), Cursor = Cursors.Hand };
-            btnBackStore.FlatAppearance.BorderSize = 0;
-            btnBackStore.Click += (s, e) => { if (this.Owner != null) this.Owner.Show(); this.Close(); };
-            this.Controls.Add(btnBackStore);
+            this.Controls.Add(tabs);
 
             // defaults
             rdoContadoLocal.Checked = true;
@@ -637,7 +701,10 @@ namespace Examen
             if (rdoContadoLocal.Checked)
             {
                 var opt = cmbContadoOpcionesLocal.SelectedItem.ToString();
-                if (opt == "Deposito") category = "Deposito";
+                if (opt == "Deposito Oxxo") category = "Deposito Oxxo";
+                else if (opt == "Deposito Seven Eleven") category = "Deposito Seven Eleven";
+                else if (opt == "Deposito bancario") category = "Deposito bancario";
+                else if (opt == "Transferencia") category = "Transferencia";
                 else if (opt == "Tarjeta débito") category = "Tarjeta debito";
                 else category = "Tarjeta credito"; // contado con tarjeta credito
             }
@@ -756,7 +823,10 @@ namespace Examen
             }
 
             // Counts
-            int comprasDeposito = sales.Count(s => s.Category == "Deposito");
+            int comprasDepositoOxxo = sales.Count(s => s.Category == "Deposito Oxxo");
+            int comprasDepositoSeven = sales.Count(s => s.Category == "Deposito Seven Eleven");
+            int comprasDepositoBancario = sales.Count(s => s.Category == "Deposito bancario");
+            int comprasTransferencia = sales.Count(s => s.Category == "Transferencia");
             int comprasDebito = sales.Count(s => s.Category == "Tarjeta debito");
             int comprasCreditoContado = sales.Count(s => s.Category == "Tarjeta credito");
             int comprasCreditoMSI = sales.Count(s => s.Category == "Tarjeta credito MSI");
@@ -772,7 +842,7 @@ namespace Examen
             int mp6 = sales.Count(s => s.Category == "MP Credito" && s.Months == 6);
 
             // Ingresos por tipo/meses
-            decimal ingresosContado = sales.Where(s => s.Category == "Deposito" || s.Category == "Tarjeta debito" || s.Category == "Tarjeta credito").Sum(s => s.TotalPaid);
+            decimal ingresosContado = sales.Where(s => s.Category == "Deposito Oxxo" || s.Category == "Deposito Seven Eleven" || s.Category == "Deposito bancario" || s.Category == "Transferencia" || s.Category == "Tarjeta debito" || s.Category == "Tarjeta credito").Sum(s => s.TotalPaid);
             decimal ingresosMsi3 = sales.Where(s => s.Category == "Tarjeta credito MSI" && s.Months == 3).Sum(s => s.TotalPaid);
             decimal ingresosMsi6 = sales.Where(s => s.Category == "Tarjeta credito MSI" && s.Months == 6).Sum(s => s.TotalPaid);
             decimal ingresosMsi12 = sales.Where(s => s.Category == "Tarjeta credito MSI" && s.Months == 12).Sum(s => s.TotalPaid);
@@ -786,7 +856,9 @@ namespace Examen
             int totalEnviosFull = sales.Count(s => s.ShippingType == "Full");
             decimal totalShippingNormal = sales.Where(s => s.ShippingType == "Normal").Sum(s => s.ShippingCost);
             decimal totalShippingFull = sales.Where(s => s.ShippingType == "Full").Sum(s => s.ShippingCost);
-            decimal totalDeposito = sales.Where(s => s.Category == "Deposito").Sum(s => s.TotalPaid);
+            decimal totalDepositoOxxo = sales.Where(s => s.Category == "Deposito Oxxo").Sum(s => s.TotalPaid);
+            decimal totalDepositoSeven = sales.Where(s => s.Category == "Deposito Seven Eleven").Sum(s => s.TotalPaid);
+            decimal totalDepositoBancarioYTransferencia = sales.Where(s => s.Category == "Deposito bancario" || s.Category == "Transferencia").Sum(s => s.TotalPaid);
             decimal totalDebito = sales.Where(s => s.Category == "Tarjeta debito").Sum(s => s.TotalPaid);
             decimal totalCreditoContado = sales.Where(s => s.Category == "Tarjeta credito").Sum(s => s.TotalPaid);
             decimal totalCreditoMSI = sales.Where(s => s.Category == "Tarjeta credito MSI").Sum(s => s.TotalPaid);
@@ -829,7 +901,10 @@ namespace Examen
             sb.AppendLine("Ventas por meses (Mercado Pago):");
             sb.AppendLine($"- 3 meses: {mp3}");
             sb.AppendLine($"- 6 meses: {mp6}");
-            sb.AppendLine($"- Depósito: {comprasDeposito}");
+            sb.AppendLine($"- Depósito Oxxo: {comprasDepositoOxxo}");
+            sb.AppendLine($"- Depósito Seven Eleven: {comprasDepositoSeven}");
+            sb.AppendLine($"- Depósito bancario: {comprasDepositoBancario}");
+            sb.AppendLine($"- Transferencia: {comprasTransferencia}");
             sb.AppendLine($"- Tarjeta débito: {comprasDebito}");
             sb.AppendLine($"- Tarjeta crédito (contado): {comprasCreditoContado}");
             sb.AppendLine($"- Tarjeta crédito a MSI: {comprasCreditoMSI}");
@@ -846,7 +921,9 @@ namespace Examen
             sb.AppendLine($"- Ingresos MP 6 meses: ${ingresosMp6:0.00}");
             sb.AppendLine($"- Ingresos por envíos (Normal): ${totalShippingNormal:0.00}");
             sb.AppendLine($"- Ingresos por envíos (Full): ${totalShippingFull:0.00}");
-            sb.AppendLine($"- Depósitos: ${totalDeposito:0.00}");
+            sb.AppendLine($"- Depósitos Oxxo: ${totalDepositoOxxo:0.00}");
+            sb.AppendLine($"- Depósitos Seven Eleven: ${totalDepositoSeven:0.00}");
+            sb.AppendLine($"- Depósitos bancarios y Transferencias: ${totalDepositoBancarioYTransferencia:0.00}");
             sb.AppendLine($"- Tarjeta débito: ${totalDebito:0.00}");
             sb.AppendLine($"- Tarjeta crédito (contado): ${totalCreditoContado:0.00}");
             sb.AppendLine($"- Tarjeta crédito a MSI: ${totalCreditoMSI:0.00}");
