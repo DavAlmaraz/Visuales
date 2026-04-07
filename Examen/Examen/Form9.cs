@@ -338,6 +338,18 @@ namespace Examen
             this.Controls.Add(tabs);
 
             UpdateAccountLabel();
+            LoadPurchaseHistory();
+        }
+
+        private void LoadPurchaseHistory()
+        {
+            var a = AccountManager.CurrentAccount;
+            if (a == null) return;
+            foreach (var p in a.PurchaseHistory)
+            {
+                string commInfo = p.AppliedCommission ? $"Com:${p.Commission:0.00}x{p.Quantity}" : "Sin com";
+                historyGrid.Rows.Add(p.Date.ToString("HH:mm"), "Compra ML", $"${p.TotalPaid:0.00}", $"{p.ProductName} x{p.Quantity} ({commInfo})");
+            }
         }
 
         private void UpdateAccountLabel()
@@ -472,6 +484,8 @@ namespace Examen
             sb.AppendLine($"  Recargas celular totales: ${a.TotalRecharged:0.00}");
             sb.AppendLine($"  Pagos servicios totales:  ${a.TotalServicesPaid:0.00}");
             sb.AppendLine($"  Recargas Tag totales:     ${a.TotalTagRecharged:0.00}");
+            sb.AppendLine($"  Compras ML totales:       ${a.TotalPurchased:0.00}");
+            sb.AppendLine($"  Comisiones ML (peso/vol): ${a.TotalCommissionsPaid:0.00}");
             sb.AppendLine($"  Saldo actual:             ${a.Balance:0.00}");
             sb.AppendLine();
             sb.AppendLine("──────────────────────────────────────");
@@ -519,6 +533,29 @@ namespace Examen
             sb.AppendLine("  DETALLE DE RECARGAS TAG");
             sb.AppendLine("──────────────────────────────────────");
             foreach (var k in a.TagRechargeCounts.Keys) { decimal val = a.TagRechargeTotals.ContainsKey(k) ? a.TagRechargeTotals[k] : 0m; sb.AppendLine($"   • {k}: {a.TagRechargeCounts[k]} recargas — ${val:0.00}"); }
+            sb.AppendLine();
+            sb.AppendLine("──────────────────────────────────────");
+            sb.AppendLine("  COMPRAS EN MERCADO LIBRE");
+            sb.AppendLine("──────────────────────────────────────");
+            if (a.PurchaseHistory.Count == 0)
+            {
+                sb.AppendLine("   (Sin compras realizadas)");
+            }
+            else
+            {
+                foreach (var k in a.PurchaseCounts.Keys)
+                {
+                    decimal val = a.PurchaseTotals.ContainsKey(k) ? a.PurchaseTotals[k] : 0m;
+                    sb.AppendLine($"   • {k}: {a.PurchaseCounts[k]} unidades — ${val:0.00}");
+                }
+                sb.AppendLine();
+                sb.AppendLine($"   Total productos comprados:     {a.TotalPurchaseItems}");
+                sb.AppendLine($"   Productos con comisión:        {a.PurchaseItemsWithCommission}");
+                sb.AppendLine($"   Productos sin comisión:        {a.PurchaseItemsWithoutCommission}");
+                sb.AppendLine($"   Total gastado en productos:    ${a.TotalPurchased:0.00}");
+                sb.AppendLine($"   Total comisiones peso/volumen: ${a.TotalCommissionsPaid:0.00}");
+                sb.AppendLine($"   Total gastado (con comisiones):${(a.TotalPurchased + a.TotalCommissionsPaid):0.00}");
+            }
             sb.AppendLine();
             sb.AppendLine("══════════════════════════════════════");
             sb.AppendLine($"  Cuentas creadas: {AccountManager.Accounts.Count}");

@@ -16,12 +16,22 @@ namespace Examen
         {
             InitializeComponent();
             InitializeMenuControls();
+            this.VisibleChanged += (s, e) =>
+            {
+                if (this.Visible)
+                {
+                    var acct = AccountManager.CurrentAccount;
+                    if (acct != null && lblUserBalance != null)
+                        lblUserBalance.Text = $"Saldo: ${acct.Balance:0.00}";
+                }
+            };
         }
 
         private Button btnOpenStore;
         private Button btnAccountSummaryMenu;
         private Button btnLogout;
         private Button btnAccountOps;
+        private Label lblUserBalance;
 
         private void InitializeMenuControls()
         {
@@ -82,7 +92,7 @@ namespace Examen
                 TextAlign = ContentAlignment.MiddleCenter,
                 BackColor = Color.Transparent
             };
-            Label lblUserBalance = new Label
+            lblUserBalance = new Label
             {
                 Text = "",
                 Font = new Font("Segoe UI", 10f, FontStyle.Bold),
@@ -497,6 +507,11 @@ namespace Examen
                 totalComisiones += comm * cnt;
             }
             decimal totalSaldos = accounts.Sum(a => a.Balance);
+            decimal totalComprasML = accounts.Sum(a => a.TotalPurchased);
+            decimal totalComisionesML = accounts.Sum(a => a.TotalCommissionsPaid);
+            int totalProductosComprados = accounts.Sum(a => a.TotalPurchaseItems);
+            int totalConComision = accounts.Sum(a => a.PurchaseItemsWithCommission);
+            int totalSinComision = accounts.Sum(a => a.PurchaseItemsWithoutCommission);
 
             sb.AppendLine($"  Ingresos totales:         ${totalIngresos:0.00}");
             sb.AppendLine($"  Transferencias totales:   ${totalTransferencias:0.00}");
@@ -504,8 +519,18 @@ namespace Examen
             sb.AppendLine($"  Recargas celular totales: ${totalRecargas:0.00}");
             sb.AppendLine($"  Pagos servicios totales:  ${totalServicios:0.00}");
             sb.AppendLine($"  Recargas Tag totales:     ${totalTagRecargas:0.00}");
-            sb.AppendLine($"  Comisiones totales:       ${totalComisiones:0.00}");
+            sb.AppendLine($"  Comisiones retiro totales:${totalComisiones:0.00}");
             sb.AppendLine($"  Suma de saldos (todos):   ${totalSaldos:0.00}");
+            sb.AppendLine();
+            sb.AppendLine("──────────────────────────────────────");
+            sb.AppendLine("  COMPRAS EN MERCADO LIBRE (GLOBAL)");
+            sb.AppendLine("──────────────────────────────────────");
+            sb.AppendLine($"  Total productos comprados:     {totalProductosComprados}");
+            sb.AppendLine($"  Productos con comisión:        {totalConComision}");
+            sb.AppendLine($"  Productos sin comisión:        {totalSinComision}");
+            sb.AppendLine($"  Total gastado en productos:    ${totalComprasML:0.00}");
+            sb.AppendLine($"  Total comisiones peso/volumen: ${totalComisionesML:0.00}");
+            sb.AppendLine($"  Total gastado (con comisiones):${(totalComprasML + totalComisionesML):0.00}");
 
             ShowStyledReport("Informe Global del Sistema", sb.ToString(), Color.FromArgb(102, 187, 106));
         }

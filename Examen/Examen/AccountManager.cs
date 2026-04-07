@@ -29,6 +29,13 @@ namespace Examen
         public Dictionary<string, decimal> ServicePaymentTotals { get; } = new Dictionary<string, decimal>();
         public Dictionary<string, int> TagRechargeCounts { get; } = new Dictionary<string, int>();
         public Dictionary<string, decimal> TagRechargeTotals { get; } = new Dictionary<string, decimal>();
+        public Dictionary<string, int> PurchaseCounts { get; } = new Dictionary<string, int>();
+        public Dictionary<string, decimal> PurchaseTotals { get; } = new Dictionary<string, decimal>();
+        public decimal TotalCommissionsPaid { get; set; }
+        public int TotalPurchaseItems { get; set; }
+        public int PurchaseItemsWithCommission { get; set; }
+        public int PurchaseItemsWithoutCommission { get; set; }
+        public List<PurchaseRecord> PurchaseHistory { get; } = new List<PurchaseRecord>();
 
         public int TotalDeposits => DepositCounts.Values.Sum();
         public decimal TotalDeposited => DepositTotals.Values.Sum();
@@ -42,6 +49,8 @@ namespace Examen
         public decimal TotalServicesPaid => ServicePaymentTotals.Values.Sum();
         public int TotalTagRecharges => TagRechargeCounts.Values.Sum();
         public decimal TotalTagRecharged => TagRechargeTotals.Values.Sum();
+        public int TotalPurchases => PurchaseCounts.Values.Sum();
+        public decimal TotalPurchased => PurchaseTotals.Values.Sum();
 
         public Account(string owner, string cardNumber, string accountNumber, string phone, string address, string email, string password)
         {
@@ -55,6 +64,18 @@ namespace Examen
             FailedLoginAttempts = 0;
             Balance = 0m;
         }
+    }
+
+    public class PurchaseRecord
+    {
+        public string ProductName { get; set; }
+        public int Quantity { get; set; }
+        public decimal UnitPrice { get; set; }
+        public decimal Weight { get; set; }
+        public decimal Commission { get; set; }
+        public bool AppliedCommission { get; set; }
+        public decimal TotalPaid { get; set; }
+        public DateTime Date { get; set; }
     }
 
     public static class AccountManager
