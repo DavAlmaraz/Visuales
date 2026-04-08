@@ -20,15 +20,10 @@ namespace Examen
             public string Name { get; set; }
             public decimal Price { get; set; }
             public int Quantity { get; set; }
-            public decimal Weight { get; set; }
-            public decimal Commission { get; set; }
-            public bool ApplyCommission { get; set; }
             public decimal Subtotal => Price * Quantity;
-            public decimal TotalCommission => ApplyCommission ? Commission * Quantity : 0m;
             public override string ToString()
             {
-                string comTxt = ApplyCommission ? $" [Peso:{Weight}kg Com:${Commission:0.00}x{Quantity}]" : "";
-                return $"{Name} x{Quantity} - ${Subtotal:0.00}{comTxt}";
+                return $"{Name} x{Quantity} - ${Subtotal:0.00}";
             }
         }
 
@@ -50,6 +45,8 @@ namespace Examen
             }
             // clear selected items view when rebuilding list
             lstVentaItems.Items.Clear();
+            // also refresh returns tab sales list
+            PopulateDevSalesList();
         }
 
         private void LstVentas_SelectedIndexChanged(object sender, EventArgs e)
@@ -258,14 +255,11 @@ namespace Examen
             public int Months { get; set; }
             public string ShippingType { get; set; }
             public decimal ShippingCost { get; set; }
-            public decimal TotalCommission { get; set; }
-            public int ItemsWithCommission { get; set; }
-            public int ItemsWithoutCommission { get; set; }
             public List<CartItem> Items { get; set; }
             public string CancellationReason { get; set; }
         }
 
-        private readonly List<SaleRecord> sales = new List<SaleRecord>();
+        private static readonly List<SaleRecord> sales = new List<SaleRecord>();
         // Map of visible sale indices in the ListBox to actual sales list indexes
         private readonly List<int> visibleSaleIndexes = new List<int>();
         // Cancellations history (pre and post sale)
@@ -278,7 +272,7 @@ namespace Examen
             public List<string> Items { get; set; }
         }
 
-        private readonly List<CancellationRecord> cancellations = new List<CancellationRecord>();
+        private static readonly List<CancellationRecord> cancellations = new List<CancellationRecord>();
 
         // UI controls
         private ComboBox cmbProductosLocal;
@@ -294,10 +288,6 @@ namespace Examen
         private ComboBox cmbMSIMesesLocal;
         private ComboBox cmbMPOpcionesLocal;
         private Button btnResumenLocal;
-        // weight/commission controls
-        private NumericUpDown numPesoLocal;
-        private NumericUpDown numComisionLocal;
-        private CheckBox chkAplicarComision;
         // shipping controls
         private Panel pnlEnvioGroup;
         private RadioButton rdoEnvioNormal;
@@ -312,6 +302,11 @@ namespace Examen
         private CheckBox chkCancelarTodo;
         private Button btnCancelarLocal;
         private Button btnBackStore;
+        // return/refund controls
+        private ListBox lstDevVentas;
+        private ListBox lstDevItems;
+        private Button btnDevolver;
+        private ListBox lstDevHistorial;
 
         public Form5()
         {
@@ -319,6 +314,9 @@ namespace Examen
             InitializeFormControls();
             InitializeProducts();
             HookEventsLocal();
+            // Populate UI with persisted data on re-open
+            PopulateSalesList();
+            LoadReturnHistory();
         }
 
         private void InitializeFormControls()
@@ -415,13 +413,7 @@ namespace Examen
             btnAgregarLocal.FlatAppearance.BorderSize = 0;
             btnVerCarritoLocal = new Button { Text = "✅ Confirmar compra", Location = new Point(780, 8), Size = new Size(150, 34), BackColor = Color.FromArgb(66, 165, 245), ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9.5f, FontStyle.Bold), Cursor = Cursors.Hand };
             btnVerCarritoLocal.FlatAppearance.BorderSize = 0;
-            // Weight/commission row
-            Label lblPeso = new Label { Text = "Peso (kg):", Location = new Point(14, 56), AutoSize = true, ForeColor = Color.FromArgb(90, 80, 60), Font = new Font("Segoe UI", 9f) };
-            numPesoLocal = new NumericUpDown { Location = new Point(90, 52), Width = 80, Minimum = 0, Maximum = 10000, DecimalPlaces = 2, Value = 0, Font = new Font("Segoe UI", 9f) };
-            Label lblComision = new Label { Text = "Comisión ($):", Location = new Point(190, 56), AutoSize = true, ForeColor = Color.FromArgb(90, 80, 60), Font = new Font("Segoe UI", 9f) };
-            numComisionLocal = new NumericUpDown { Location = new Point(280, 52), Width = 90, Minimum = 0, Maximum = 100000, DecimalPlaces = 2, Value = 0, Font = new Font("Segoe UI", 9f) };
-            chkAplicarComision = new CheckBox { Text = "Aplicar comisión por peso/volumen", Location = new Point(390, 54), AutoSize = true, Font = new Font("Segoe UI", 9f), ForeColor = Color.FromArgb(90, 80, 60) };
-            pnlProductRow.Controls.AddRange(new Control[] { lblProducto, cmbProductosLocal, lblCantidad, numCantidadLocal, btnAgregarLocal, btnVerCarritoLocal, lblPeso, numPesoLocal, lblComision, numComisionLocal, chkAplicarComision });
+            pnlProductRow.Controls.AddRange(new Control[] { lblProducto, cmbProductosLocal, lblCantidad, numCantidadLocal, btnAgregarLocal, btnVerCarritoLocal });
 
             // Left: Payment method panel
             Panel pnlPago = new Panel { Location = new Point(14, 112), Size = new Size(560, 240), BackColor = Color.White };
@@ -529,6 +521,38 @@ namespace Examen
             tabs.TabPages.Add(tabCompra);
             tabs.TabPages.Add(tabVentas);
 
+            // ═══════════════════════════════════════
+            //  TAB 3: Devoluciones
+            // ═══════════════════════════════════════
+            TabPage tabDevoluciones = new TabPage("🔄  Devoluciones")
+            {
+                BackColor = Color.FromArgb(255, 243, 224),
+                Padding = new Padding(10)
+            };
+
+            Label lblDevVentas = new Label { Text = "📦 Seleccione una venta", Location = new Point(14, 10), AutoSize = true, ForeColor = Color.FromArgb(69, 90, 100), Font = new Font("Segoe UI", 11f, FontStyle.Bold) };
+            lstDevVentas = new ListBox { Location = new Point(14, 38), Size = new Size(460, 200), BorderStyle = BorderStyle.FixedSingle, BackColor = Color.White, Font = new Font("Segoe UI", 9f) };
+            lstDevVentas.SelectedIndexChanged += LstDevVentas_SelectedIndexChanged;
+
+            Label lblDevItems = new Label { Text = "📋 Productos de la venta", Location = new Point(490, 10), AutoSize = true, ForeColor = Color.FromArgb(69, 90, 100), Font = new Font("Segoe UI", 11f, FontStyle.Bold) };
+            lstDevItems = new ListBox { Location = new Point(490, 38), Size = new Size(464, 200), SelectionMode = SelectionMode.MultiExtended, BorderStyle = BorderStyle.FixedSingle, BackColor = Color.White, Font = new Font("Segoe UI", 9f) };
+
+            btnDevolver = new Button { Text = "🔄 Devolver productos seleccionados", Location = new Point(14, 250), Size = new Size(300, 36), BackColor = Color.FromArgb(255, 152, 0), ForeColor = Color.White, FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI", 9.5f, FontStyle.Bold), Cursor = Cursors.Hand };
+            btnDevolver.FlatAppearance.BorderSize = 0;
+            btnDevolver.Click += BtnDevolver_Click;
+
+            Label lblDevHist = new Label { Text = "📝 Historial de devoluciones", Location = new Point(14, 296), AutoSize = true, ForeColor = Color.FromArgb(69, 90, 100), Font = new Font("Segoe UI", 11f, FontStyle.Bold) };
+            lstDevHistorial = new ListBox { Location = new Point(14, 324), Size = new Size(940, 200), BorderStyle = BorderStyle.FixedSingle, BackColor = Color.White, Font = new Font("Segoe UI", 9f) };
+
+            tabDevoluciones.Controls.Add(lblDevVentas);
+            tabDevoluciones.Controls.Add(lstDevVentas);
+            tabDevoluciones.Controls.Add(lblDevItems);
+            tabDevoluciones.Controls.Add(lstDevItems);
+            tabDevoluciones.Controls.Add(btnDevolver);
+            tabDevoluciones.Controls.Add(lblDevHist);
+            tabDevoluciones.Controls.Add(lstDevHistorial);
+            tabs.TabPages.Add(tabDevoluciones);
+
             this.Controls.Add(topHeader);
             this.Controls.Add(tabs);
 
@@ -633,10 +657,8 @@ namespace Examen
             }
 
             var selected = products[cmbProductosLocal.SelectedIndex];
-            decimal weight = numPesoLocal.Value;
-            decimal commission = numComisionLocal.Value;
-            bool applyComm = chkAplicarComision.Checked;
-            var item = new CartItem { Name = selected.Name, Price = selected.Price, Quantity = qty, Weight = weight, Commission = commission, ApplyCommission = applyComm };
+            decimal price = selected.Price;
+            var item = new CartItem { Name = selected.Name, Price = price, Quantity = qty };
             cart.Add(item);
             lstCarritoLocal.Items.Add(item.ToString());
         }
@@ -657,16 +679,13 @@ namespace Examen
             }
 
             decimal total = cart.Sum(i => i.Subtotal);
-            decimal totalCommission = cart.Sum(i => i.TotalCommission);
-            int itemsWithComm = cart.Count(i => i.ApplyCommission);
-            int itemsWithoutComm = cart.Count(i => !i.ApplyCommission);
 
             // shipping cost - no extra charge per requirement
             decimal shippingCost = 0m;
 
             string paymentDetail = "";
             int months = 0;
-            decimal totalToPay = total + shippingCost + totalCommission;
+            decimal totalToPay = total + shippingCost;
             List<(int Number, decimal Amount)> installments = null;
 
             if (rdoContadoLocal.Checked)
@@ -689,7 +708,7 @@ namespace Examen
                 {
                     months = 3;
                     decimal interestAmount = Math.Round(total * 0.10m * months, 2);
-                    totalToPay = Math.Round(total + shippingCost + totalCommission + interestAmount, 2);
+                    totalToPay = Math.Round(total + shippingCost + interestAmount, 2);
                     decimal per = Math.Round(totalToPay / months, 2);
                     installments = new List<(int, decimal)>();
                     for (int i = 1; i <= months; i++) installments.Add((i, per));
@@ -698,7 +717,7 @@ namespace Examen
                 {
                     months = 6;
                     decimal interestAmount = Math.Round(total * 0.10m * months, 2);
-                    totalToPay = Math.Round(total + shippingCost + totalCommission + interestAmount, 2);
+                    totalToPay = Math.Round(total + shippingCost + interestAmount, 2);
                     decimal per = Math.Round(totalToPay / months, 2);
                     installments = new List<(int, decimal)>();
                     for (int i = 1; i <= months; i++) installments.Add((i, per));
@@ -719,9 +738,6 @@ namespace Examen
             sb.AppendLine("═══ RESUMEN DE COMPRA ═══");
             sb.AppendLine();
             sb.AppendLine($"Total productos: ${total:0.00}");
-            sb.AppendLine($"Comisiones peso/volumen: ${totalCommission:0.00}");
-            sb.AppendLine($"Productos con comisión: {itemsWithComm}");
-            sb.AppendLine($"Productos sin comisión: {itemsWithoutComm}");
             sb.AppendLine($"Método: {paymentDetail}");
             sb.AppendLine($"Envío: {(rdoEnvioFull.Checked ? "Full" : "Normal")}");
             if (installments != null)
@@ -730,7 +746,7 @@ namespace Examen
                 sb.AppendLine("Mensualidades:");
                 foreach (var it in installments)
                     sb.AppendLine($"  {it.Number} -> ${it.Amount:0.00}");
-                decimal interestAmount = totalToPay - total - totalCommission;
+                decimal interestAmount = totalToPay - total;
                 if (interestAmount > 0)
                 {
                     if (rdoMercadoPagoLocal.Checked && months > 0)
@@ -749,8 +765,7 @@ namespace Examen
             sb.AppendLine("── Detalle de productos ──");
             foreach (var c in cart)
             {
-                string commInfo = c.ApplyCommission ? $" | Com: ${c.Commission:0.00}x{c.Quantity}=${c.TotalCommission:0.00} (Peso:{c.Weight}kg)" : " | Sin comisión";
-                sb.AppendLine($"  {c.Name} x{c.Quantity} = ${c.Subtotal:0.00}{commInfo}");
+                sb.AppendLine($"  {c.Name} x{c.Quantity} = ${c.Subtotal:0.00}");
             }
             sb.AppendLine();
             sb.AppendLine($"Saldo MP restante: ${a.Balance:0.00}");
@@ -780,7 +795,7 @@ namespace Examen
                 else category = "MP Credito";
             }
 
-            decimal interest = totalToPay - total - totalCommission;
+            decimal interest = totalToPay - total;
             int itemsCount = cart.Sum(i => i.Quantity);
             sales.Add(new SaleRecord
             {
@@ -790,10 +805,7 @@ namespace Examen
                 InterestAmount = interest,
                 Months = months,
                 ItemsCount = itemsCount,
-                TotalCommission = totalCommission,
-                ItemsWithCommission = itemsWithComm,
-                ItemsWithoutCommission = itemsWithoutComm,
-                Items = cart.Select(c => new CartItem { Name = c.Name, Price = c.Price, Quantity = c.Quantity, Weight = c.Weight, Commission = c.Commission, ApplyCommission = c.ApplyCommission }).ToList(),
+                Items = cart.Select(c => new CartItem { Name = c.Name, Price = c.Price, Quantity = c.Quantity }).ToList(),
                 ShippingType = (rdoEnvioFull.Checked ? "Full" : "Normal"),
                 ShippingCost = shippingCost
             });
@@ -807,20 +819,12 @@ namespace Examen
                 a.PurchaseCounts[key] += c.Quantity;
                 a.PurchaseTotals[key] += c.Subtotal;
                 a.TotalPurchaseItems += c.Quantity;
-                if (c.ApplyCommission)
-                    a.PurchaseItemsWithCommission += c.Quantity;
-                else
-                    a.PurchaseItemsWithoutCommission += c.Quantity;
-                a.TotalCommissionsPaid += c.TotalCommission;
                 a.PurchaseHistory.Add(new PurchaseRecord
                 {
                     ProductName = c.Name,
                     Quantity = c.Quantity,
                     UnitPrice = c.Price,
-                    Weight = c.Weight,
-                    Commission = c.Commission,
-                    AppliedCommission = c.ApplyCommission,
-                    TotalPaid = c.Subtotal + c.TotalCommission,
+                    TotalPaid = c.Subtotal,
                     Date = DateTime.Now
                 });
             }
@@ -958,9 +962,6 @@ namespace Examen
             decimal totalMPCredito = sales.Where(s => s.Category == "MP Credito").Sum(s => s.TotalPaid);
 
             decimal totalIntereses = sales.Sum(s => s.InterestAmount);
-            decimal totalComisionesPesoVol = sales.Sum(s => s.TotalCommission);
-            int totalConComision = sales.Sum(s => s.ItemsWithCommission);
-            int totalSinComision = sales.Sum(s => s.ItemsWithoutCommission);
 
             // Cancellations summary
             int totalCancellations = cancellations.Count;
@@ -978,16 +979,11 @@ namespace Examen
             if (a != null)
             {
                 sb.AppendLine($"Saldo MP disponible para compras: ${a.Balance:0.00}");
-                sb.AppendLine($"Total gastado en compras ML: ${a.TotalPurchased + a.TotalCommissionsPaid:0.00}");
+                sb.AppendLine($"Total gastado en compras ML: ${a.TotalPurchased:0.00}");
                 sb.AppendLine();
             }
             sb.AppendLine($"Total productos vendidos: {totalProductosVendidos}");
             sb.AppendLine($"Total ventas (transacciones): {sales.Count}");
-            sb.AppendLine();
-            sb.AppendLine("── Comisiones por peso/volumen ──");
-            sb.AppendLine($"Total comisiones cobradas: ${totalComisionesPesoVol:0.00}");
-            sb.AppendLine($"Productos CON comisión: {totalConComision}");
-            sb.AppendLine($"Productos SIN comisión: {totalSinComision}");
             sb.AppendLine();
             sb.AppendLine("── Compras por método ──");
             sb.AppendLine($"- Depósito Oxxo: {comprasDepositoOxxo}");
@@ -1037,7 +1033,26 @@ namespace Examen
             sb.AppendLine($"- Mercado Pago (crédito / meses): ${totalMPCredito:0.00}");
             sb.AppendLine();
             sb.AppendLine($"Ingresos por intereses: ${totalIntereses:0.00}");
-            sb.AppendLine($"Ingresos por comisiones peso/volumen: ${totalComisionesPesoVol:0.00}");
+
+            // Devoluciones summary
+            if (a != null && a.ReturnHistory.Count > 0)
+            {
+                decimal totalCompraML = a.ReturnHistory.Sum(r => r.OriginalCost);
+                decimal totalDevueltoML = a.TotalRefunded;
+                decimal totalDescuentoML = a.TotalDamageCharges;
+                decimal pctDescuentoML = totalCompraML > 0 ? Math.Round((totalDescuentoML / totalCompraML) * 100m, 2) : 0m;
+                sb.AppendLine();
+                sb.AppendLine("── Devoluciones ──");
+                sb.AppendLine($"Total devoluciones: {a.ReturnHistory.Count}");
+                int goodReturns = a.ReturnHistory.Count(r => r.IsGoodCondition);
+                int damagedReturns = a.ReturnHistory.Count(r => !r.IsGoodCondition);
+                sb.AppendLine($"Devoluciones en buen estado: {goodReturns}");
+                sb.AppendLine($"Devoluciones con daño: {damagedReturns}");
+                sb.AppendLine();
+                sb.AppendLine($"Compra: ${totalCompraML:0.00}");
+                sb.AppendLine($"Devolver: ${totalDevueltoML:0.00}");
+                sb.AppendLine($"Descuento: ${totalDescuentoML:0.00} ({pctDescuentoML:0.##}%)");
+            }
 
             ShowStyledReport("Resumen de Mercado Libre", sb.ToString(), Color.FromArgb(255, 202, 40));
         }
@@ -1107,6 +1122,161 @@ namespace Examen
         {
             // Account data is already saved in-memory via AccountManager.CurrentAccount
             // This method ensures the sidebar in Form8 refreshes when returning
+        }
+
+        private void PopulateDevSalesList()
+        {
+            lstDevVentas.Items.Clear();
+            lstDevItems.Items.Clear();
+            for (int i = 0; i < sales.Count; i++)
+            {
+                var s = sales[i];
+                if (s.ItemsCount <= 0) continue;
+                lstDevVentas.Items.Add($"Venta #{i + 1} - {s.Category} - Productos:{s.ItemsCount} - ${s.TotalPaid:0.00}");
+            }
+        }
+
+        private void LoadReturnHistory()
+        {
+            lstDevHistorial.Items.Clear();
+            var a = AccountManager.CurrentAccount;
+            if (a == null) return;
+            foreach (var r in a.ReturnHistory)
+            {
+                string condTxt = r.IsGoodCondition ? "Buen estado" : "Dañado (-20%)";
+                lstDevHistorial.Items.Add($"{r.Date:HH:mm} | {r.ProductName} x{r.Quantity} | Costo:${r.OriginalCost:0.00} | {condTxt} | Reembolso:${r.RefundAmount:0.00}");
+            }
+        }
+
+        private void LstDevVentas_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            lstDevItems.Items.Clear();
+            int idx = lstDevVentas.SelectedIndex;
+            if (idx < 0 || idx >= sales.Count) return;
+            var s = sales[idx];
+            foreach (var it in s.Items)
+                lstDevItems.Items.Add($"{it.Name} x{it.Quantity} - ${it.Subtotal:0.00}");
+        }
+
+        private void BtnDevolver_Click(object sender, EventArgs e)
+        {
+            var a = AccountManager.CurrentAccount;
+            if (a == null)
+            {
+                MessageBox.Show("Inicie sesión en una cuenta primero.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            int saleIdx = lstDevVentas.SelectedIndex;
+            if (saleIdx < 0 || saleIdx >= sales.Count)
+            {
+                MessageBox.Show("Seleccione una venta para devolver.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            if (lstDevItems.SelectedIndices.Count == 0)
+            {
+                MessageBox.Show("Seleccione uno o más productos para devolver.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            var sale = sales[saleIdx];
+            var indices = lstDevItems.SelectedIndices.Cast<int>().OrderByDescending(i => i).ToList();
+            var returnSb = new StringBuilder();
+            returnSb.AppendLine("═══ RESUMEN DE DEVOLUCIÓN ═══");
+            returnSb.AppendLine();
+
+            decimal totalCompraDevolucion = 0m;
+            decimal totalDevuelto = 0m;
+            decimal totalDescuento = 0m;
+
+            foreach (int i in indices)
+            {
+                if (i >= sale.Items.Count) continue;
+                var it = sale.Items[i];
+
+                int returnQty = it.Quantity;
+                if (it.Quantity > 1)
+                {
+                    returnQty = PromptCancelQuantity(it.Name, it.Quantity);
+                    if (returnQty <= 0) continue;
+                }
+
+                decimal originalCost = it.Price * returnQty;
+
+                var result = MessageBox.Show(
+                    $"¿El producto \"{it.Name}\" (x{returnQty}) está en buenas condiciones?\n\nSí = Reembolso completo\nNo = Se aplica cargo del 20%",
+                    "Condición del producto",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question);
+
+                bool isGood = (result == DialogResult.Yes);
+                decimal chargePercent = isGood ? 0m : 20m;
+                decimal damageCharge = isGood ? 0m : Math.Round(originalCost * 0.20m, 2);
+                decimal refundAmount = Math.Round(originalCost - damageCharge, 2);
+
+                // Refund to balance
+                a.Balance += refundAmount;
+
+                // Record return
+                a.ReturnHistory.Add(new ReturnRecord
+                {
+                    ProductName = it.Name,
+                    Quantity = returnQty,
+                    UnitPrice = it.Price,
+                    OriginalCost = originalCost,
+                    IsGoodCondition = isGood,
+                    DamageCharge = damageCharge,
+                    RefundAmount = refundAmount,
+                    ChargePercent = chargePercent,
+                    Date = DateTime.Now
+                });
+
+                returnSb.AppendLine($"Producto: {it.Name} x{returnQty}");
+                returnSb.AppendLine($"  Costo original: ${originalCost:0.00}");
+                returnSb.AppendLine($"  Condición: {(isGood ? "Buen estado" : "Dañado")}");
+                returnSb.AppendLine($"  Cargo por daño ({chargePercent:0}%): ${damageCharge:0.00}");
+                returnSb.AppendLine($"  Reembolso: ${refundAmount:0.00}");
+                returnSb.AppendLine();
+
+                totalCompraDevolucion += originalCost;
+                totalDevuelto += refundAmount;
+                totalDescuento += damageCharge;
+
+                // Update history listbox
+                string condTxt = isGood ? "Buen estado" : "Dañado (-20%)";
+                lstDevHistorial.Items.Insert(0, $"{DateTime.Now:HH:mm} | {it.Name} x{returnQty} | Costo:${originalCost:0.00} | {condTxt} | Reembolso:${refundAmount:0.00}");
+
+                // Remove or reduce item from sale
+                if (returnQty >= it.Quantity)
+                {
+                    sale.Items.RemoveAt(i);
+                }
+                else
+                {
+                    it.Quantity -= returnQty;
+                }
+                sale.ItemsCount = Math.Max(0, sale.ItemsCount - returnQty);
+            }
+
+            // If no items left, remove sale
+            if (sale.Items.Count == 0 || sale.ItemsCount <= 0)
+            {
+                sales.RemoveAt(saleIdx);
+            }
+
+            returnSb.AppendLine($"Saldo MP actualizado: ${a.Balance:0.00}");
+            returnSb.AppendLine();
+            returnSb.AppendLine("── Resumen de devolución ──");
+            decimal pctDescuento = totalCompraDevolucion > 0 ? Math.Round((totalDescuento / totalCompraDevolucion) * 100m, 2) : 0m;
+            returnSb.AppendLine($"Compra: ${totalCompraDevolucion:0.00}");
+            returnSb.AppendLine($"Devolver: ${totalDevuelto:0.00}");
+            returnSb.AppendLine($"Descuento: ${totalDescuento:0.00} ({pctDescuento:0.##}%)");
+
+            ShowStyledReport("Devolución realizada", returnSb.ToString(), Color.FromArgb(255, 152, 0));
+
+            PopulateDevSalesList();
+            PopulateSalesList();
         }
     }
 }

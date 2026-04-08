@@ -508,10 +508,7 @@ namespace Examen
             }
             decimal totalSaldos = accounts.Sum(a => a.Balance);
             decimal totalComprasML = accounts.Sum(a => a.TotalPurchased);
-            decimal totalComisionesML = accounts.Sum(a => a.TotalCommissionsPaid);
             int totalProductosComprados = accounts.Sum(a => a.TotalPurchaseItems);
-            int totalConComision = accounts.Sum(a => a.PurchaseItemsWithCommission);
-            int totalSinComision = accounts.Sum(a => a.PurchaseItemsWithoutCommission);
 
             sb.AppendLine($"  Ingresos totales:         ${totalIngresos:0.00}");
             sb.AppendLine($"  Transferencias totales:   ${totalTransferencias:0.00}");
@@ -526,11 +523,25 @@ namespace Examen
             sb.AppendLine("  COMPRAS EN MERCADO LIBRE (GLOBAL)");
             sb.AppendLine("──────────────────────────────────────");
             sb.AppendLine($"  Total productos comprados:     {totalProductosComprados}");
-            sb.AppendLine($"  Productos con comisión:        {totalConComision}");
-            sb.AppendLine($"  Productos sin comisión:        {totalSinComision}");
             sb.AppendLine($"  Total gastado en productos:    ${totalComprasML:0.00}");
-            sb.AppendLine($"  Total comisiones peso/volumen: ${totalComisionesML:0.00}");
-            sb.AppendLine($"  Total gastado (con comisiones):${(totalComprasML + totalComisionesML):0.00}");
+            sb.AppendLine();
+            sb.AppendLine("──────────────────────────────────────");
+            sb.AppendLine("  DEVOLUCIONES (GLOBAL)");
+            sb.AppendLine("──────────────────────────────────────");
+            int totalDevoluciones = accounts.Sum(a => a.ReturnHistory.Count);
+            decimal totalCompraGlobal = accounts.Sum(a => a.ReturnHistory.Sum(r => r.OriginalCost));
+            decimal totalReembolsado = accounts.Sum(a => a.TotalRefunded);
+            decimal totalCargosDano = accounts.Sum(a => a.TotalDamageCharges);
+            int totalBuenEstado = accounts.Sum(a => a.ReturnHistory.Count(r => r.IsGoodCondition));
+            int totalDanado = accounts.Sum(a => a.ReturnHistory.Count(r => !r.IsGoodCondition));
+            decimal pctDescuentoGlobal = totalCompraGlobal > 0 ? Math.Round((totalCargosDano / totalCompraGlobal) * 100m, 2) : 0m;
+            sb.AppendLine($"  Total devoluciones:            {totalDevoluciones}");
+            sb.AppendLine($"  Devoluciones buen estado:      {totalBuenEstado}");
+            sb.AppendLine($"  Devoluciones con daño:         {totalDanado}");
+            sb.AppendLine();
+            sb.AppendLine($"  Compra: ${totalCompraGlobal:0.00}");
+            sb.AppendLine($"  Devolver: ${totalReembolsado:0.00}");
+            sb.AppendLine($"  Descuento: ${totalCargosDano:0.00} ({pctDescuentoGlobal:0.##}%)");
 
             ShowStyledReport("Informe Global del Sistema", sb.ToString(), Color.FromArgb(102, 187, 106));
         }

@@ -347,8 +347,12 @@ namespace Examen
             if (a == null) return;
             foreach (var p in a.PurchaseHistory)
             {
-                string commInfo = p.AppliedCommission ? $"Com:${p.Commission:0.00}x{p.Quantity}" : "Sin com";
-                historyGrid.Rows.Add(p.Date.ToString("HH:mm"), "Compra ML", $"${p.TotalPaid:0.00}", $"{p.ProductName} x{p.Quantity} ({commInfo})");
+                historyGrid.Rows.Add(p.Date.ToString("HH:mm"), "Compra ML", $"${p.TotalPaid:0.00}", $"{p.ProductName} x{p.Quantity}");
+            }
+            foreach (var r in a.ReturnHistory)
+            {
+                string cond = r.IsGoodCondition ? "Buen estado" : $"Dañado (-{r.ChargePercent:0}%)";
+                historyGrid.Rows.Add(r.Date.ToString("HH:mm"), "Devolución ML", $"${r.RefundAmount:0.00}", $"{r.ProductName} x{r.Quantity} ({cond})");
             }
         }
 
@@ -485,7 +489,6 @@ namespace Examen
             sb.AppendLine($"  Pagos servicios totales:  ${a.TotalServicesPaid:0.00}");
             sb.AppendLine($"  Recargas Tag totales:     ${a.TotalTagRecharged:0.00}");
             sb.AppendLine($"  Compras ML totales:       ${a.TotalPurchased:0.00}");
-            sb.AppendLine($"  Comisiones ML (peso/vol): ${a.TotalCommissionsPaid:0.00}");
             sb.AppendLine($"  Saldo actual:             ${a.Balance:0.00}");
             sb.AppendLine();
             sb.AppendLine("──────────────────────────────────────");
@@ -550,11 +553,37 @@ namespace Examen
                 }
                 sb.AppendLine();
                 sb.AppendLine($"   Total productos comprados:     {a.TotalPurchaseItems}");
-                sb.AppendLine($"   Productos con comisión:        {a.PurchaseItemsWithCommission}");
-                sb.AppendLine($"   Productos sin comisión:        {a.PurchaseItemsWithoutCommission}");
                 sb.AppendLine($"   Total gastado en productos:    ${a.TotalPurchased:0.00}");
-                sb.AppendLine($"   Total comisiones peso/volumen: ${a.TotalCommissionsPaid:0.00}");
-                sb.AppendLine($"   Total gastado (con comisiones):${(a.TotalPurchased + a.TotalCommissionsPaid):0.00}");
+            }
+            sb.AppendLine();
+            sb.AppendLine("──────────────────────────────────────");
+            sb.AppendLine("  DEVOLUCIONES");
+            sb.AppendLine("──────────────────────────────────────");
+            if (a.ReturnHistory.Count == 0)
+            {
+                sb.AppendLine("   (Sin devoluciones realizadas)");
+            }
+            else
+            {
+                foreach (var r in a.ReturnHistory)
+                {
+                    string cond = r.IsGoodCondition ? "Buen estado" : "Dañado (-20%)";
+                    sb.AppendLine($"   • {r.ProductName} x{r.Quantity} — Costo:${r.OriginalCost:0.00} — {cond} — Reembolso:${r.RefundAmount:0.00}");
+                }
+                sb.AppendLine();
+                int goodReturns = a.ReturnHistory.Count(r => r.IsGoodCondition);
+                int damagedReturns = a.ReturnHistory.Count(r => !r.IsGoodCondition);
+                sb.AppendLine($"   Total devoluciones:            {a.ReturnHistory.Count}");
+                sb.AppendLine($"   Devoluciones en buen estado:   {goodReturns}");
+                sb.AppendLine($"   Devoluciones con daño:         {damagedReturns}");
+                sb.AppendLine();
+                decimal totalCompraAcc = a.ReturnHistory.Sum(r => r.OriginalCost);
+                decimal totalDevueltoAcc = a.TotalRefunded;
+                decimal totalDescuentoAcc = a.TotalDamageCharges;
+                decimal pctDescuentoAcc = totalCompraAcc > 0 ? Math.Round((totalDescuentoAcc / totalCompraAcc) * 100m, 2) : 0m;
+                sb.AppendLine($"   Compra: ${totalCompraAcc:0.00}");
+                sb.AppendLine($"   Devolver: ${totalDevueltoAcc:0.00}");
+                sb.AppendLine($"   Descuento: ${totalDescuentoAcc:0.00} ({pctDescuentoAcc:0.##}%)");
             }
             sb.AppendLine();
             sb.AppendLine("══════════════════════════════════════");

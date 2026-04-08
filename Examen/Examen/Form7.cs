@@ -73,7 +73,7 @@ namespace Examen
             };
             Label lblBrandDesc = new Label
             {
-                Text = "Tu dinero rinde más.\nPagá, cobrá e invertí\ndesde un solo lugar.",
+                Text = "Tu dinero rinde más.\nPaga, cobr e invierte\ndesde un solo lugar.",
                 Font = new Font("Segoe UI", 10.5f),
                 ForeColor = Color.FromArgb(200, 227, 255),
                 Size = new Size(260, 70),
